@@ -39,6 +39,7 @@ def send_discord_message(message):
     webhook.send(message)
 
 
+# 
 cred_file = pd.read_csv('discord_cred_text.txt', header = None)
 webhook_link = cred_file.iloc[0][0].split('=')[1].strip()
 discordChLink = cred_file.iloc[1][0].split('=')[1].strip()
@@ -257,8 +258,13 @@ def main():
     contract.lastTradeDateOrContractMonth = "202312"  # Replace with your desired expiration date
     
     retryConnection = 0
+    breakcode = 0 # to exit code if any issues are found and send discord message
     
     while True:
+        if breakcode ==1 :
+            send_discord_message('Please resolve issues and re run code, or it will next start automatically in an hour.')
+            time.sleep(.5)
+            break
         try:
             ordernum  = app.nextValidOrderId
             print('established connection..')
@@ -285,6 +291,12 @@ def main():
                 time.sleep(.2)
                 break
             except:
+                print('retrial: ',retryConnection)
+                if retryConnection > 10:
+                    breakcode = 1
+                    send_discord_message("Error with TWS Connection. Please check if account is logged in, or connect with our representatives.")
+                    time.sleep(.5)
+                    break
                 pass
             # if retryConnection > 5:
             #     print('couldnt establish connection, please check manually')
@@ -304,6 +316,7 @@ def main():
     UtcTz = pytz.timezone("UTC") #New_York
     timeInNewYork = datetime.now(newYorkTz)
     timeInUTC = datetime.now(UtcTz)
+    utcHour = timeInUTC.hour
     currentTimeInNewYork = timeInNewYork.strftime("%H:%M:%S")
     currentTimeInUTC = timeInUTC.strftime("%H:%M:%S")
     systemTime = datetime.now()
@@ -332,7 +345,7 @@ def main():
     prevhour = crnthour
     crntmin = timeInNewYork.minute
     prevmin = crntmin
-    exitTime = pd.to_datetime(currentTimeInNewYork) + timedelta(minutes = 59, seconds = 58)
+    exitTime = pd.to_datetime(currentTimeInNewYork) + timedelta(minutes = 59, seconds = 50)
     print('exitTime is ',exitTime)
     
     # code to handle trades that are placed exactly during the code refresh time
@@ -348,9 +361,6 @@ def main():
     
     # code for the edge case of hourly messages
     
-    lasttime = pd.read_excel('C://Users//prave//OneDrive//Documents//Freelancer//last_timestamp.xlsx')
-    lasttime = pd.to_datetime(lasttime.iloc[0][0]) 
-    lasttime = str(lasttime)[:19]
     # first reading when previous code shutdown
     df = pd.DataFrame()
     for value in jobj:
@@ -361,17 +371,16 @@ def main():
             break
             
     df[1] = pd.to_datetime(df[1])
-    df[1] = df[1].apply(lambda x:str(x)[:19])
-    dffilt = df[df[1]>=lasttime]
-    print(df)
-    print(lasttime)
-    print(dffilt)
+    # df[1] = df[1].apply(lambda x:str(x)[:19])
+    customUTC = timeInUTC.replace(minute = 0,second = 0)
+    dffilt = df[df[1]>=customUTC]
+    
     if len(dffilt)>0:
         
         for i in range(0,len(dffilt)):
-            print(dffilt.iloc[i][0])
+            # print(dffilt.iloc[i][0])
             if 'ES1' in dffilt.iloc[i][0]:
-                print('in loop')
+                print('in loop:',i)
                 crntmsg = dffilt.iloc[i][0]
                 print('ES1! trade found during transition!!')
                 
@@ -379,6 +388,8 @@ def main():
     
     while datetime.now() < exitTime:
         # print(i)
+        if breakcode == 1:
+            break
         timeInNewYork = datetime.now(newYorkTz)
         try: # running the whole code in try except loop to check for errors
             msg = retrieve_messages()
@@ -399,7 +410,7 @@ def main():
             
             crntmtime = pd.to_datetime(crntmtime) - timedelta(hours = deltaHours)
             # 
-            if str(crntmtime) > str(datetime.now() - timedelta(seconds = 105)):
+            if str(crntmtime) > str(datetime.now() - timedelta(seconds = 155)):
                 # it is a recent message
                 
                 if crntmsg!=prevmsg: 
@@ -506,6 +517,7 @@ def main():
                                 print(e)
                                 if retryConnection > 10:
                                     send_discord_message("TWS connection FAILED..")
+                                    time.sleep(.5)
                                     break
                                 pass
                         except Exception as e:
@@ -518,6 +530,7 @@ def main():
                                 print('message 2')
                                 send_discord_message("ERROR in re establishing connection! Please check immediately!!!!!!!")
                                 time.sleep(1)
+                                breakcode = 1
                                 break
                         
                     
@@ -555,6 +568,8 @@ def main():
                              print(df3)
                              if retryConnection > 10:
                                  send_discord_message("TWS connection FAILED..")
+                                 breakcode = 1
+                                 time.sleep(.5)
                                  break
                              pass
                      except Exception as e:
@@ -567,6 +582,7 @@ def main():
                              print('message 2')
                              send_discord_message("ERROR in re establishing connection! Please check immediately!!!!!!!")
                              time.sleep(1)
+                             breakcode = 1
                              break
              if error_inc < 3:
                  errorFile = r"errorLog_" + folder_time+".txt"
@@ -585,6 +601,7 @@ def main():
     send_discord_message("Hourly program terminanted..")
 
 if __name__ == '__main__':
+    # send_discord_message('v5_4')
     main()
     newYorkTz = pytz.timezone("US/Eastern") #New_York
     UtcTz = pytz.timezone("UTC") #New_York
@@ -592,8 +609,5 @@ if __name__ == '__main__':
     timeInUTC = datetime.now(UtcTz)
     currentTimeInNewYork = timeInNewYork.strftime("%H:%M:%S")
     currentTimeInUTC = timeInUTC.strftime("%H:%M:%S")
-    os.remove('C://Users//prave//OneDrive//Documents//Freelancer//last_timestamp.xlsx')
-    time.sleep(.3)
-    print('removed file')
-    pd.DataFrame([pd.to_datetime(currentTimeInUTC)]).to_excel('C://Users//prave//OneDrive//Documents//Freelancer//last_timestamp.xlsx')
-    print(currentTimeInUTC)
+    
+    
