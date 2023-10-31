@@ -44,8 +44,8 @@ cred_file = pd.read_csv('discord_cred_text.txt', header = None)
 webhook_link = cred_file.iloc[0][0].split('=')[1].strip()
 discordChLink = cred_file.iloc[1][0].split('=')[1].strip()
 authCode = cred_file.iloc[2][0].split('=')[1].strip()
-portNum = cred_file.iloc[3][0].split('=')[1].strip()
-qtyValue = cred_file.iloc[4][0].split('=')[1].strip()
+portNum = int(cred_file.iloc[3][0].split('=')[1].strip())
+qtyValue = int(cred_file.iloc[4][0].split('=')[1].strip())
 # TTB channel
 webhook = SyncWebhook.from_url(webhook_link)
 discordChannel = discordChLink
