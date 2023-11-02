@@ -388,7 +388,7 @@ def main():
                 print('ES1! trade found during transition!!')
                 
     ####################
-    while datetime.now() < exitTime:
+    while datetime.now() - timedelta(hours = 4)< exitTime:
         # print(i)
         if breakcode == 1:
             break
