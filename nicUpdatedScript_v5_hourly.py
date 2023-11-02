@@ -38,7 +38,8 @@ from discord import SyncWebhook
 def send_discord_message(message):
     webhook.send(message)
 
-
+print('printing demo text')
+time.sleep(5)
 # 
 cred_file = pd.read_csv('discord_cred_text.txt', header = None)
 webhook_link = cred_file.iloc[0][0].split('=')[1].strip()
