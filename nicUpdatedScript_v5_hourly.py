@@ -339,55 +339,10 @@ def main():
         deltaHours = 5 
     
         
-    msg = retrieve_messages()
-    crntmsg = msg.iloc[0][0]
-    prevmsg = crntmsg
-    print(crntmsg)
-    crnthour = timeInUTC.hour
-    prevhour = crnthour
-    crntmin = timeInUTC.minute
-    prevmin = crntmin
-    exitTime = pd.to_datetime(currentTimeInUTC) + timedelta(minutes = 59, seconds = 50)
-    exitTime = datetime.now() + timedelta(minutes = 59, seconds = 50) # adding this to run temp on praveen system
+   
+    exitTime = datetime.now() + timedelta(minutes = 59, seconds = 50) # 
     print('exitTime is ',exitTime)
-    print('time now is ',datetime.now())
-    print('diff in time is:',systemTime - pd.to_datetime(currentTimeInUTC))
-    # code to handle trades that are placed exactly during the code refresh time
-    # check for edge of hourly messages missing trades
-    headers = {
-        'authorization':authorizationCode
-        }
     
-    r = requests.get(discordChannel,headers = headers)
-    
-    jobj = json.loads(r.text)
-    i = 0
-    
-    # code for the edge case of hourly messages
-    
-    # first reading when previous code shutdown
-    df = pd.DataFrame()
-    for value in jobj:
-        i += 1
-        print(value['content'],"\n")
-        df = pd.concat([df,pd.DataFrame([value['content'],value['timestamp']]).transpose()]) # contains discord messages
-        if i > 4:
-            break
-            
-    df[1] = pd.to_datetime(df[1])
-    # df[1] = df[1].apply(lambda x:str(x)[:19])
-    customUTC = timeInUTC.replace(minute = 0,second = 0)
-    dffilt = df[df[1]>=customUTC]
-    
-    if len(dffilt)>0:
-        
-        for i in range(0,len(dffilt)):
-            # print(dffilt.iloc[i][0])
-            if 'ES1' in dffilt.iloc[i][0]:
-                print('in loop:',i)
-                crntmsg = dffilt.iloc[i][0]
-                print('ES1! trade found during transition!!')
-                
     ####################
     while datetime.now() < exitTime:
         # print(i)
