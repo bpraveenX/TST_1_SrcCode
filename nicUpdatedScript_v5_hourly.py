@@ -476,7 +476,7 @@ def main():
                         
                     elif 'report status' in crntmsg:
                         # this is to send details of how the bot is working
-                        cstr = 'last TWS connection was at:'+str(app.twsConnectionTime())
+                        cstr = 'last TWS connection was at:'+str(app.twsConnectionTime())+" @ portNum:"+str(portNum)
                         send_discord_message(cstr)
                         
                         # app.reqAccountSummary(1, "All", "$LEDGER:ALL")
