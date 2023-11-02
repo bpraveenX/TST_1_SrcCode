@@ -343,11 +343,11 @@ def main():
     crntmsg = msg.iloc[0][0]
     prevmsg = crntmsg
     print(crntmsg)
-    crnthour = timeInNewYork.hour
+    crnthour = timeInUTC.hour
     prevhour = crnthour
-    crntmin = timeInNewYork.minute
+    crntmin = timeInUTC.minute
     prevmin = crntmin
-    exitTime = pd.to_datetime(currentTimeInNewYork) + timedelta(minutes = 59, seconds = 50)
+    exitTime = pd.to_datetime(currentTimeInUTC) + timedelta(minutes = 59, seconds = 50)
     print('exitTime is ',exitTime)
     
     # code to handle trades that are placed exactly during the code refresh time
@@ -392,7 +392,7 @@ def main():
         # print(i)
         if breakcode == 1:
             break
-        timeInNewYork = datetime.now(newYorkTz)
+        timeInUTC = datetime.now(newYorkTz)
         try: # running the whole code in try except loop to check for errors
             msg = retrieve_messages()
             # print(datetime.now())
@@ -400,7 +400,7 @@ def main():
             crntmtime = msg.iloc[0][1]
             # print([crntmtime,datetime.now()])
             prevhour = crnthour
-            crnthour = timeInNewYork.hour
+            crnthour = timeInUTC.hour
             
             # if crntmin % 15 == 0 and crntmin!=prevmin:
             #     # print([crntmin, prevmin])
@@ -408,7 +408,7 @@ def main():
             #     time.sleep(.5)
                 
             prevmin = crntmin
-            crntmin = timeInNewYork.minute
+            crntmin = timeInUTC.minute
             
             crntmtime = pd.to_datetime(crntmtime) - timedelta(hours = deltaHours)
             # 
