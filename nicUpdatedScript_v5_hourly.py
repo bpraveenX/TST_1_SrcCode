@@ -348,6 +348,7 @@ def main():
     crntmin = timeInUTC.minute
     prevmin = crntmin
     exitTime = pd.to_datetime(currentTimeInUTC) + timedelta(minutes = 59, seconds = 50)
+    exitTime = datetime.now() + timedelta(minutes = 59, seconds = 50) # adding this to run temp on praveen system
     print('exitTime is ',exitTime)
     print('time now is ',datetime.now())
     print('diff in time is:',systemTime - pd.to_datetime(currentTimeInUTC))
@@ -388,7 +389,7 @@ def main():
                 print('ES1! trade found during transition!!')
                 
     ####################
-    while datetime.now() - timedelta(hours = 4)< exitTime:
+    while datetime.now() < exitTime:
         # print(i)
         if breakcode == 1:
             break
