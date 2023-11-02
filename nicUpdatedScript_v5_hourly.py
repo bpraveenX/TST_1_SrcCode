@@ -318,9 +318,9 @@ def main():
     UtcTz = pytz.timezone("UTC") #New_York
     timeInNewYork = datetime.now(newYorkTz)
     timeInUTC = datetime.now(UtcTz)
+    currentTimeInUTC = timeInUTC.strftime("%H:%M:%S")
     utcHour = timeInUTC.hour
     currentTimeInNewYork = timeInNewYork.strftime("%H:%M:%S")
-    currentTimeInUTC = timeInUTC.strftime("%H:%M:%S")
     systemTime = datetime.now()
     systemTime - pd.to_datetime(currentTimeInUTC)
     pd.to_datetime(currentTimeInUTC) - systemTime
@@ -350,6 +350,7 @@ def main():
     exitTime = pd.to_datetime(currentTimeInUTC) + timedelta(minutes = 59, seconds = 50)
     print('exitTime is ',exitTime)
     print('time now is ',datetime.now())
+    print('diff in time is:,systemTime - pd.to_datetime(currentTimeInUTC))
     # code to handle trades that are placed exactly during the code refresh time
     # check for edge of hourly messages missing trades
     headers = {
@@ -387,7 +388,6 @@ def main():
                 print('ES1! trade found during transition!!')
                 
     ####################
-    print('exit time is: ',exitTime)
     while datetime.now() < exitTime:
         # print(i)
         if breakcode == 1:
