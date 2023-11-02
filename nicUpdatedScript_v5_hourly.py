@@ -350,7 +350,7 @@ def main():
     exitTime = pd.to_datetime(currentTimeInUTC) + timedelta(minutes = 59, seconds = 50)
     print('exitTime is ',exitTime)
     print('time now is ',datetime.now())
-    print('diff in time is:,systemTime - pd.to_datetime(currentTimeInUTC))
+    print('diff in time is:',systemTime - pd.to_datetime(currentTimeInUTC))
     # code to handle trades that are placed exactly during the code refresh time
     # check for edge of hourly messages missing trades
     headers = {
