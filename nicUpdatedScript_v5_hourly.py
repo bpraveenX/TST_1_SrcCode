@@ -494,6 +494,33 @@ def main():
                         cstr = "code will end in "+str(timeleft.seconds)+ " seconds."
                         send_discord_message(cstr)
                         time.sleep(.1)
+
+                    elif 'close all orders' in crntmsg:
+                        app.reqPositions()
+                        time.sleep(1)
+                        pos_df = app.pos_df
+                        time.sleep(2)
+                        # got the current position above
+                        for pos in range(0,len(pos_df)):
+                            po = pos_df['Position'].iloc[pos]
+                            ordType = ''
+                            order_id = ordernum
+                            posQty = 0
+                            if po < 0:
+                                ordType = 'BUY'
+                                posQty = int(po * -1)
+                            elif po > 0:
+                                ordType = 'SELL'
+                                posQty = int(po)
+                                
+                            if len(ordType)>1:
+                                app.placeOrder(order_id, contract, marketOrder(ordType,posQty))
+                                
+                        time.sleep(2)
+                        
+                        send_discord_message('cancel all open order')
+                        time.sleep(.1)
+                        
                     elif 'refresh connection' in crntmsg:
                         # providing code to refresh connection to TWS through Nic's discord bots
                         
