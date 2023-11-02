@@ -38,8 +38,7 @@ from discord import SyncWebhook
 def send_discord_message(message):
     webhook.send(message)
 
-print('printing demo text')
-time.sleep(5)
+
 # 
 cred_file = pd.read_csv('discord_cred_text.txt', header = None)
 webhook_link = cred_file.iloc[0][0].split('=')[1].strip()
@@ -650,6 +649,8 @@ def main():
 
 if __name__ == '__main__':
     # send_discord_message('v5_4')
+    print('printing demo text')
+    time.sleep(5)
     main()
     newYorkTz = pytz.timezone("US/Eastern") #New_York
     UtcTz = pytz.timezone("UTC") #New_York
