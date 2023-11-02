@@ -520,7 +520,24 @@ def main():
                         
                         send_discord_message('cancel all open order')
                         time.sleep(.1)
+
+                    elif 'cancel all open order' in crntmsg:
+                        app.reqAllOpenOrders()
                         
+                        time.sleep(1)
+                        order_df = app.order_df
+                        print('open order df')
+                        print(order_df)
+                        print('1st is:')
+                        print(order_df.iloc[0])
+                        time.sleep(2)
+                        for order in range(0,len(order_df)):
+                            app.cancelOrder(order_df.iloc[order]['OrderId'])
+                            time.sleep(.5)
+                            print('canceled order: ',order_df.iloc[order]['OrderId'])
+                            cstr = 'canceled order: '+str(order_df.iloc[order]['OrderId'])
+                            send_discord_message(cstr)
+                            
                     elif 'refresh connection' in crntmsg:
                         # providing code to refresh connection to TWS through Nic's discord bots
                         
