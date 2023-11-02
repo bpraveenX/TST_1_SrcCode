@@ -1,0 +1,5 @@
+webhook = 
+discordChannel = 
+auth = 
+port = 
+qty = 
