@@ -43,8 +43,8 @@ import pytz
 
 
 
-authorizationCode = 'NDgyNDIxODA5MzcxODA3NzQ0.GgmldC.Pvemow4l9heGqfFwf5CWBUyWR1TVCJDVHglF4M'
-discordChannel = "https://discord.com/api/v9/channels/1164522133305692212/messages"
+authorizationCode = ''
+discordChannel = ""
 
 
                                                       
