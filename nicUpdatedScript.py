@@ -40,15 +40,15 @@ def send_discord_message(message):
 def send_discord_message_1(message):
     webhookPraveen.send(message)
 #praveen channel details
-authorizationCode = 'ODkzOTcwMDMxODQxNTQyMjA1.Gi48RK.gBFLGUzPrsHqOJLiVYSgAVSA_OOCuwstr0iMIQ'
-discordChannel = "https://discord.com/api/v9/channels/1127012008601075736/messages"
-webhookPraveen = SyncWebhook.from_url("https://discord.com/api/webhooks/1127012232488820786/WdtQ36e82-qcuXRseipkHSoyDvIRG33x20eO9iHRK-MPES7pHOdEb2gkax-FTWXHXA_e")
+authorizationCode = ''
+discordChannel = "h"
+webhookPraveen = SyncWebhook.from_url("")
 
 
 # TTB channel
-webhook = SyncWebhook.from_url("https://discordapp.com/api/webhooks/1154087963467206716/Jq96TWgHtVrZcu4TQFIlS78yjcWf5toH9gjhBPaotN7NvxJWi8zi1Unt1tr80oYSyLdD")
-discordChannel = "https://discord.com/api/v9/channels/1154087865584726029/messages"
-authorizationCode = "ODkzOTcwMDMxODQxNTQyMjA1.Gi48RK.gBFLGUzPrsHqOJLiVYSgAVSA_OOCuwstr0iMIQ"
+webhook = SyncWebhook.from_url("httptr80oYSyLdD")
+discordChannel = "https://discormessages"
+authorizationCode = "ODkzOTcwMtr0iMIQ"
 
 def retrieve_messages():
     headers = {
