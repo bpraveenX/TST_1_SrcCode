@@ -261,6 +261,21 @@ def main():
     
     retryConnection = 0
     breakcode = 0 # to exit code if any issues are found and send discord message
+
+    while True:
+        try:
+            msg = retrieve_messages()
+            crntmsg = msg.iloc[0][0] #initialzing previous message
+            prevmsg = crntmsg
+            print('initialMessage: \n')
+            print(prevmsg)
+            if len(prevmsg) > 1:
+                break
+            
+        except:
+            print('msg not found')
+            time.sleep(1)
+            pass
     
     while True:
         if breakcode ==1 :
