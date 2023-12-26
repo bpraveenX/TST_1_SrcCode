@@ -431,18 +431,20 @@ def main():
     crntmsg = '1'
     prevmsg = '2'
     
-    if crntmsg != prevmsg:
-        msg = retrieve_messages()
-        crntmsg = msg.iloc[0][0]
-        prevmsg = crntmsg
-        print(crntmsg)
-        crnthour = timeInNewYork.hour
-        prevhour = crnthour
-        crntmin = timeInNewYork.minute
-        prevmin = crntmin
-        exitTime = pd.to_datetime(currentTimeInNewYork) + timedelta(minutes = 59, seconds = 50)
-        print('exitTime is ',exitTime)
-        time.sleep(.5)
+    while crntmsg != prevmsg:
+        try:
+            msg = retrieve_messages()
+            crntmsg = msg.iloc[0][0]
+            prevmsg = crntmsg
+            print(crntmsg)
+            crnthour = timeInNewYork.hour
+            prevhour = crnthour
+            crntmin = timeInNewYork.minute
+            prevmin = crntmin
+            exitTime = pd.to_datetime(currentTimeInNewYork) + timedelta(minutes = 59, seconds = 50)
+            print('exitTime is ',exitTime)
+        except:
+            time.sleep(.5)
         
     # code to handle trades that are placed exactly during the code refresh time
     # check for edge of hourly messages missing trades
@@ -709,11 +711,11 @@ def main():
                     
                         
                 prevmsg = crntmsg
-                
+            print('read @',datetime.now())
         except Exception as e:
-             print('type of error is ', type(e))
+             #print('type of error is ', type(e))
              df3 = pd.DataFrame([e])
-             print(df3)
+             #print(df3)
              if 'positional indexer' in str(df3[0].iloc[0]):
                  print('in except refresh connection loop')
                  #refresh connection
@@ -774,12 +776,12 @@ def main():
                  time.sleep(.4)
                  
              if error_inc < 3:
-                 errorFile = r"errorLog_" + folder_time+".txt"
-                 print(df3)
+                 #errorFile = r"errorLog_" + folder_time+".txt"
+                 #print(df3)
                  # error_message = traceback.format_exc()
                  # error_payload = {'content': f"Error in script: {error_message}"}
-                 df3 = pd.DataFrame([e])
-                 df3.to_csv(errorFile, header=None, index=None, sep=' ', mode='a')
+                 #df3 = pd.DataFrame([e])
+                 #df3.to_csv(errorFile, header=None, index=None, sep=' ', mode='a')
                  time.sleep(1) # to give it a min and see if we can re run code.
              else:
                  break
