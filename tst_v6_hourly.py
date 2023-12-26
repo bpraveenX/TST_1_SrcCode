@@ -443,7 +443,8 @@ def main():
             prevhour = crnthour
             crntmin = timeInNewYork.minute
             prevmin = crntmin
-            exitTime = pd.to_datetime(currentTimeInNewYork) + timedelta(minutes = 59, seconds = 50)
+            dttemp = datetime.now()
+            exitTime = dttemp.replace(minute = 59, second = 50)#pd.to_datetime(currentTimeInNewYork) + timedelta(minutes = 59, seconds = 50)
             print('exitTime is ',exitTime)
         except:
             time.sleep(.5)
