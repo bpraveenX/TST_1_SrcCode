@@ -454,22 +454,24 @@ def main():
     headers = {
         'authorization':authorizationCode
         }
-    
-    r = requests.get(discordChannel,headers = headers)
-    
-    jobj = json.loads(r.text)
-    i = 0
-    
-    # code for the edge case of hourly messages
-    
-    # first reading when previous code shutdown
+
     df = pd.DataFrame()
-    for value in jobj:
-        i += 1
-        print(value['content'],"\n")
-        df = pd.concat([df,pd.DataFrame([value['content'],value['timestamp']]).transpose()]) # contains discord messages
-        if i > 4:
-            break
+    while len(df) == 0:
+        r = requests.get(discordChannel,headers = headers)
+        
+        jobj = json.loads(r.text)
+        i = 0
+        
+        # code for the edge case of hourly messages
+        
+        # first reading when previous code shutdown
+        
+        for value in jobj:
+            i += 1
+            print(value['content'],"\n")
+            df = pd.concat([df,pd.DataFrame([value['content'],value['timestamp']]).transpose()]) # contains discord messages
+            if i > 4:
+                break
             
     df[1] = pd.to_datetime(df[1])
     # df[1] = df[1].apply(lambda x:str(x)[:19])
