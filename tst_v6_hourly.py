@@ -30,60 +30,6 @@ import pytz
 
 import sys
 
-### google sheet code ##########
-# import os.path
-
-# from google.auth.transport.requests import Request
-# from google.oauth2.credentials import Credentials
-# from google_auth_oauthlib.flow import InstalledAppFlow
-# from googleapiclient.discovery import build
-# from googleapiclient.errors import HttpError
-
-# from google.oauth2 import service_account
-
-# SERVICE_ACCOUNT_FILE = 'tstDev1_gSheetKey.json'
-
-# # If modifying these scopes, delete the file token.json.
-# SCOPES = ["https://www.googleapis.com/auth/spreadsheets.readonly"]
-
-# creds = None
-# creds = service_account.Credentials.from_service_account_file(
-#         SERVICE_ACCOUNT_FILE, scopes=SCOPES)
-
-# # The ID and range of a sample spreadsheet.
-# SAMPLE_SPREADSHEET_ID = "1q"
-
-
-# try:
-#   service = build("sheets", "v4", credentials=creds)
-
-#   # Call the Sheets API
-#   sheet = service.spreadsheets()
-#   result = (
-#       sheet.values()
-#       .get(spreadsheetId=SAMPLE_SPREADSHEET_ID, range="Sheet1!A1:B4")
-#       .execute()
-#   )
-#   values = result.get("values", [])
-
-#   if not values:
-#     print("No data found.")
-
-
-
-#   print("Name, Major:")
-#   for row in values:
-#     if row[0] == 'expiry':
-#         expiryValue = row[1]
-#         print(expiryValue, ' is the contract expiry')
-#     if row[0] == 'authCode':
-#         authCode = row[1]
-#         print(authCode, ' is the auth code for D.Ch')
-#     # print(row[0],row[1])
-# except HttpError as err:
-#   print(err)
-# ##################################
-
 # print(authCode)
 expiryValue = '202403'
 ######### discord piece of code ##############
@@ -93,8 +39,6 @@ from discord import SyncWebhook
 def send_discord_message(message):
     webhook.send(message)
 
-
-# 
 cred_file = pd.read_csv('C:\\Users\\Administrator\\Downloads\\discord_cred_text.txt', header = None)
 webhook_link = cred_file.iloc[0][0].split('=')[1].strip()
 discordChLink = cred_file.iloc[1][0].split('=')[1].strip()
@@ -107,13 +51,6 @@ contractName = cred_file.iloc[5][0].split('=')[1].strip()
 webhook = SyncWebhook.from_url(webhook_link)
 discordChannel = discordChLink
 authorizationCode = authCode
-
-# read client id
-# try:
-#     textClientId = pd.read_csv('clientIdValue.csv')
-# except:
-#     clientvalue = 0 
-    
 
 def retrieve_messages():
     headers = {
@@ -182,10 +119,10 @@ def main():
                           "Exchange": contract.exchange, "Action": order.action, "OrderType": order.orderType,
                           "TotalQty": order.totalQuantity, "CashQty": order.cashQty, 
                           "LmtPrice": order.lmtPrice, "AuxPrice": order.auxPrice, "Status": orderState.status}
+            # self.order_df = self.order_df.append(dictionary, ignore_index=True)
             d1 = pd.DataFrame([dictionary])
             d2 = pd.concat([self.order_df,d1])
             self.order_df = d2
-            # self.order_df = self.order_df.append(dictionary, ignore_index=True)
             
         ######### uncomment code below if you want to see the data downloaded (historic)
         def historicalData(self, reqId, bar):
@@ -200,9 +137,10 @@ def main():
             super().position(account, contract, position, avgCost)
             dictionary = {"Account":account, "Symbol": contract.symbol, "SecType": contract.secType,
                           "Currency": contract.currency, "Position": position, "Avg cost": avgCost}
+            # self.pos_df = self.pos_df.append(dictionary, ignore_index=True)
             d1 = pd.DataFrame([dictionary])
             d2 = pd.concat([self.pos_df,d1])
-            self.pos_df = d2 #self.pos_df.append(dictionary, ignore_index=True)
+            self.pos_df = d2
     
     def usTechStk(symbol,expiry,sec_type="FUT",currency="USD",exchange="CME"):
         # ES is pulled from the CME exchange, not GLOBEX
