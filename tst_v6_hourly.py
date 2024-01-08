@@ -764,8 +764,3 @@ if __name__ == '__main__':
     currentTimeInUTC = timeInUTC.strftime("%H:%M:%S")
     
     
-
-
-
-# tdf = pd.read_excel('temp.xlsx')
-# t2 = tdf[tdf['Unnamed: 0'].str.contains("Upward X/Upward X+")]
