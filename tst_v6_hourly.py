@@ -101,7 +101,7 @@ discordChLink = cred_file.iloc[1][0].split('=')[1].strip()
 authCode = cred_file.iloc[2][0].split('=')[1].strip()
 portNum = cred_file.iloc[3][0].split('=')[1].strip()
 qty = cred_file.iloc[4][0].split('=')[1].strip()
-contractName = qty = cred_file.iloc[5][0].split('=')[1].strip()
+contractName = cred_file.iloc[5][0].split('=')[1].strip()
 
 # TTB channel
 webhook = SyncWebhook.from_url(webhook_link)
