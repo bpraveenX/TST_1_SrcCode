@@ -289,6 +289,7 @@ def main():
         parent.eTradeOnly = ''
         parent.firmQuoteOnly = ''
         parent.tif = "GTC"
+        parent.outsideRth = True
         tdf = pd.DataFrame([order_id,direction])
         ordersummary = pd.concat([ordersummary,tdf.transpose()])
         
@@ -304,6 +305,7 @@ def main():
         slOrder.eTradeOnly = ''
         slOrder.firmQuoteOnly = ''
         slOrder.tif = "GTC"
+        slOrder.outsideRth = True
         tdf = pd.DataFrame([parent.orderId + 1,slOrder.action])
         ordersummary = pd.concat([ordersummary,tdf.transpose()])
         
@@ -318,6 +320,7 @@ def main():
         tpOrder.eTradeOnly = ''
         tpOrder.firmQuoteOnly = ''
         tpOrder.tif = "GTC"
+        tpOrder.outsideRth = True
         tdf = pd.DataFrame([parent.orderId + 2,tpOrder.action])
         ordersummary = pd.concat([ordersummary,tdf.transpose()])
         ordersummary.to_excel('ordersummary.xlsx')
