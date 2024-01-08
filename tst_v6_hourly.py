@@ -157,12 +157,18 @@ def main():
         def accountSummary(self, reqId, account, tag, value, currency):
             super().accountSummary(reqId, account, tag, value, currency)
             dictionary = {"ReqId":reqId, "Account": account, "Tag": tag, "Value": value, "Currency": currency}
-            self.acc_summary = self.acc_summary.append(dictionary, ignore_index=True)
+            # self.acc_summary = self.acc_summary.append(dictionary, ignore_index=True)
+            d1 = pd.DataFrame([dictionary])
+            d2 = pd.concat([self.acc_summary,d1])
+            self.acc_summary = d2
             
         def pnl(self, reqId, dailyPnL, unrealizedPnL, realizedPnL):
             super().pnl(reqId, dailyPnL, unrealizedPnL, realizedPnL)
             dictionary = {"ReqId":reqId, "DailyPnL": dailyPnL, "UnrealizedPnL": unrealizedPnL, "RealizedPnL": realizedPnL}
-            self.pnl_summary = self.pnl_summary.append(dictionary, ignore_index=True)
+            # self.pnl_summary = self.pnl_summary.append(dictionary, ignore_index=True)
+            d1 = pd.DataFrame([dictionary])
+            d2 = pd.concat([self.pnl_summary,d1])
+            self.pnl_summary = d2
             
         def nextValidId(self, orderId):
             super().nextValidId(orderId)
@@ -176,7 +182,10 @@ def main():
                           "Exchange": contract.exchange, "Action": order.action, "OrderType": order.orderType,
                           "TotalQty": order.totalQuantity, "CashQty": order.cashQty, 
                           "LmtPrice": order.lmtPrice, "AuxPrice": order.auxPrice, "Status": orderState.status}
-            self.order_df = self.order_df.append(dictionary, ignore_index=True)
+            d1 = pd.DataFrame([dictionary])
+            d2 = pd.concat([self.order_df,d1])
+            self.order_df = d2
+            # self.order_df = self.order_df.append(dictionary, ignore_index=True)
             
         ######### uncomment code below if you want to see the data downloaded (historic)
         def historicalData(self, reqId, bar):
@@ -191,7 +200,9 @@ def main():
             super().position(account, contract, position, avgCost)
             dictionary = {"Account":account, "Symbol": contract.symbol, "SecType": contract.secType,
                           "Currency": contract.currency, "Position": position, "Avg cost": avgCost}
-            self.pos_df = self.pos_df.append(dictionary, ignore_index=True)
+            d1 = pd.DataFrame([dictionary])
+            d2 = pd.concat([self.pos_df,d1])
+            self.pos_df = d2 #self.pos_df.append(dictionary, ignore_index=True)
     
     def usTechStk(symbol,expiry,sec_type="FUT",currency="USD",exchange="CME"):
         # ES is pulled from the CME exchange, not GLOBEX
