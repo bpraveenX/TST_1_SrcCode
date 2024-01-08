@@ -153,12 +153,18 @@ def main():
         def accountSummary(self, reqId, account, tag, value, currency):
             super().accountSummary(reqId, account, tag, value, currency)
             dictionary = {"ReqId":reqId, "Account": account, "Tag": tag, "Value": value, "Currency": currency}
-            self.acc_summary = self.acc_summary.append(dictionary, ignore_index=True)
+            # self.acc_summary = self.acc_summary.append(dictionary, ignore_index=True)
+            d1 = pd.DataFrame([dictionary])
+            d2 = pd.concat([self.acc_summary,d1])
+            self.acc_summary = d2
             
         def pnl(self, reqId, dailyPnL, unrealizedPnL, realizedPnL):
             super().pnl(reqId, dailyPnL, unrealizedPnL, realizedPnL)
             dictionary = {"ReqId":reqId, "DailyPnL": dailyPnL, "UnrealizedPnL": unrealizedPnL, "RealizedPnL": realizedPnL}
-            self.pnl_summary = self.pnl_summary.append(dictionary, ignore_index=True)
+            # self.pnl_summary = self.pnl_summary.append(dictionary, ignore_index=True)
+            d1 = pd.DataFrame([dictionary])
+            d2 = pd.concat([self.pnl_summary,d1])
+            self.pnl_summary = d2
             
         def nextValidId(self, orderId):
             super().nextValidId(orderId)
@@ -172,7 +178,28 @@ def main():
                           "Exchange": contract.exchange, "Action": order.action, "OrderType": order.orderType,
                           "TotalQty": order.totalQuantity, "CashQty": order.cashQty, 
                           "LmtPrice": order.lmtPrice, "AuxPrice": order.auxPrice, "Status": orderState.status}
-            self.order_df = self.order_df.append(dictionary, ignore_index=True)
+            # self.order_df = self.order_df.append(dictionary, ignore_index=True)
+            d1 = pd.DataFrame([dictionary])
+            d2 = pd.concat([self.order_df,d1])
+            self.order_df = d2
+            
+        ######### uncomment code below if you want to see the data downloaded (historic)
+        def historicalData(self, reqId, bar):
+            if reqId not in self.data:
+                self.data[reqId] = pd.DataFrame([{"Date":bar.date,"Open":bar.open,"High":bar.high,"Low":bar.low,"Close":bar.close,"Volume":bar.volume}])
+            else:
+                self.data[reqId] = pd.concat((self.data[reqId],pd.DataFrame([{"Date":bar.date,"Open":bar.open,"High":bar.high,"Low":bar.low,"Close":bar.close,"Volume":bar.volume}])))
+                #self.data[reqId].append({"Date":bar.date,"Open":bar.open,"High":bar.high,"Low":bar.low,"Close":bar.close,"Volume":bar.volume})
+            # print("reqID:{}, date:{}, open:{}, high:{}, low:{}, close:{}, volume:{}".format(reqId,bar.date,bar.open,bar.high,bar.low,bar.close,bar.volume))
+            
+        def position(self, account, contract, position, avgCost):
+            super().position(account, contract, position, avgCost)
+            dictionary = {"Account":account, "Symbol": contract.symbol, "SecType": contract.secType,
+                          "Currency": contract.currency, "Position": position, "Avg cost": avgCost}
+            # self.pos_df = self.pos_df.append(dictionary, ignore_index=True)
+            d1 = pd.DataFrame([dictionary])
+            d2 = pd.concat([self.pos_df,d1])
+            self.pos_df = d2
             
         ######### uncomment code below if you want to see the data downloaded (historic)
         def historicalData(self, reqId, bar):
