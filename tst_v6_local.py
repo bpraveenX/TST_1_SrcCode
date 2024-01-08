@@ -88,10 +88,6 @@ import sys
 expiryValue = '202403'
 ######### discord piece of code ##############
 # this is to retrieve messages from channel
-from discord import SyncWebhook
-
-def send_discord_message(message):
-    webhook.send(message)
 
 
 # 
@@ -104,6 +100,13 @@ portNum = cred_file.iloc[3][0].split('=')[1].strip()
 qty = cred_file.iloc[4][0].split('=')[1].strip()
 contractName = cred_file.iloc[5][0].split('=')[1].strip()
 
+from discord import SyncWebhook
+
+webhook = SyncWebhook.from_url(webhook_link)
+
+def send_discord_message(message):
+    webhook.send(message)
+    
 # read client id
 # try:
 #     textClientId = pd.read_csv('clientIdValue.csv')
