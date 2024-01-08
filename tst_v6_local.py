@@ -96,14 +96,13 @@ def send_discord_message(message):
 
 # 
 cred_file = pd.read_csv('discord_cred_text.txt', header = None)
+
 webhook_link = cred_file.iloc[0][0].split('=')[1].strip()
 discordChLink = cred_file.iloc[1][0].split('=')[1].strip()
 authCode = cred_file.iloc[2][0].split('=')[1].strip()
-
-# TTB channel
-webhook = SyncWebhook.from_url(webhook_link)
-discordChannel = discordChLink
-authorizationCode = authCode
+portNum = cred_file.iloc[3][0].split('=')[1].strip()
+qty = cred_file.iloc[4][0].split('=')[1].strip()
+contractName = cred_file.iloc[5][0].split('=')[1].strip()
 
 # read client id
 # try:
@@ -334,7 +333,7 @@ def main():
     clientId = 1
     
     app = TradeApp()
-    app.connect(host='127.0.0.1', port=7497, clientId=clientId) #port 4002 for ib gateway paper trading/7497 for TWS paper trading
+    app.connect(host='127.0.0.1', port=portNum, clientId=clientId) #port 4002 for ib gateway paper trading/7497 for TWS paper trading
     con_thread = threading.Thread(target=websocket_con, daemon=True)
     con_thread.start()
     time.sleep(1) # some latency added to ensure that the connection is established
@@ -343,9 +342,9 @@ def main():
         base = 0.25
         return round(base * round(number/base),2)
     
-    tickers = ["ES"]
+    tickers = [contractName]
     contract = Contract()
-    contract.symbol = "ES"
+    contract.symbol = contractName
     contract.secType = "FUT"
     contract.exchange = "CME"
     contract.currency = "USD"
@@ -373,7 +372,7 @@ def main():
             time.sleep(1)
             print('restarting TWS connection')
             app = TradeApp()
-            app.connect(host='127.0.0.1', port=7497, clientId=clientId) #port 4002 for ib gateway paper trading/7497 for TWS paper trading
+            app.connect(host='127.0.0.1', port=portNum, clientId=clientId) #port 4002 for ib gateway paper trading/7497 for TWS paper trading
             con_thread = threading.Thread(target=websocket_con, daemon=True)
             con_thread.start()
             time.sleep(1) # some latency added to ensure that the connection is established
@@ -590,7 +589,7 @@ def main():
                         print('in enter short')
                         
                         # bktOrder(order_id,direction,quantity,lmt_price, sl_price, tp_price)
-                        bracket = bktOrder(order_id,"SELL",1,buyval,sllvl,tplvl)
+                        bracket = bktOrder(order_id,"SELL",qty,buyval,sllvl,tplvl)
                         for ordr in bracket:
                             app.placeOrder(ordr.orderId, contract, ordr)
                         ordernum = ordernum+3
@@ -684,7 +683,7 @@ def main():
                             time.sleep(.5)
                             print('restarting TWS connection')
                             app = TradeApp()
-                            app.connect(host='127.0.0.1', port=7497, clientId=clientId) #port 4002 for ib gateway paper trading/7497 for TWS paper trading
+                            app.connect(host='127.0.0.1', port=portNum, clientId=clientId) #port 4002 for ib gateway paper trading/7497 for TWS paper trading
                             con_thread = threading.Thread(target=websocket_con, daemon=True)
                             con_thread.start()
                             time.sleep(1) # some latency added to ensure that the connection is established
@@ -735,7 +734,7 @@ def main():
                          time.sleep(.5)
                          print('restarting TWS connection')
                          app = TradeApp()
-                         app.connect(host='127.0.0.1', port=7497, clientId=clientId) #port 4002 for ib gateway paper trading/7497 for TWS paper trading
+                         app.connect(host='127.0.0.1', port=portNum, clientId=clientId) #port 4002 for ib gateway paper trading/7497 for TWS paper trading
                          con_thread = threading.Thread(target=websocket_con, daemon=True)
                          con_thread.start()
                          time.sleep(1) # some latency added to ensure that the connection is established
