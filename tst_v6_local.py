@@ -749,9 +749,9 @@ def main():
                 prevmsg = crntmsg
                 
         except Exception as e:
-             print('type of error is ', type(e))
+             #print('type of error is ', type(e))
              df3 = pd.DataFrame([e])
-             print(df3)
+             #print(df3)
              if 'positional indexer' in str(df3[0].iloc[0]):
                  print('in except refresh connection loop')
                  #refresh connection
@@ -764,7 +764,7 @@ def main():
                          time.sleep(.5)
                          print('restarting TWS connection')
                          app = TradeApp()
-                         app.connect(host='127.0.0.1', port=portNum, clientId=clientId) #port 4002 for ib gateway paper trading/7497 for TWS paper trading
+                         app.connect(host='127.0.0.1', port=int(portNum), clientId=clientId) #port 4002 for ib gateway paper trading/7497 for TWS paper trading
                          con_thread = threading.Thread(target=websocket_con, daemon=True)
                          con_thread.start()
                          time.sleep(1) # some latency added to ensure that the connection is established
@@ -812,12 +812,12 @@ def main():
                  time.sleep(.4)
                  
              if error_inc < 3:
-                 errorFile = r"errorLog_" + folder_time+".txt"
-                 print(df3)
+                 #errorFile = r"errorLog_" + folder_time+".txt"
+                 #print(df3)
                  # error_message = traceback.format_exc()
                  # error_payload = {'content': f"Error in script: {error_message}"}
-                 df3 = pd.DataFrame([e])
-                 df3.to_csv(errorFile, header=None, index=None, sep=' ', mode='a')
+                 #df3 = pd.DataFrame([e])
+                 #df3.to_csv(errorFile, header=None, index=None, sep=' ', mode='a')
                  time.sleep(1) # to give it a min and see if we can re run code.
              else:
                  break
