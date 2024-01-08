@@ -481,7 +481,7 @@ def main():
                         app.reqPositions()
                         time.sleep(.5)
                         pos_df = app.pos_df
-                        # pos_df.drop_duplicates(inplace=True,ignore_index=True)
+                        pos_df.drop_duplicates(inplace=True,ignore_index=True)
                         crntLen = len(pos_df)
                         x22 = crntmsg.split("@")
                         buyval = float(x22[1])
@@ -507,7 +507,7 @@ def main():
                         app.reqPositions()
                         time.sleep(1)
                         pos_df = app.pos_df
-                        pos_df.drop_duplicates(inplace=True,ignore_index=True)
+                        # pos_df.drop_duplicates(inplace=True,ignore_index=True)
                         postLen = len(pos_df)
                         
                         ordernum = ordernum+3
@@ -552,7 +552,7 @@ def main():
                         app.reqPositions()
                         time.sleep(1)
                         pos_df = app.pos_df
-                        pos_df.drop_duplicates(inplace=True,ignore_index=True)
+                        # pos_df.drop_duplicates(inplace=True,ignore_index=True)
                         postLen = len(pos_df)
                         
                         if postLen > crntLen:
@@ -611,7 +611,7 @@ def main():
                         app.reqPositions()
                         time.sleep(1)
                         pos_df = app.pos_df
-                        pos_df.drop_duplicates(inplace=True,ignore_index=True)
+                        # pos_df.drop_duplicates(inplace=True,ignore_index=True)
                         postLen = len(pos_df)
                         if postLen > crntLen:
                             
