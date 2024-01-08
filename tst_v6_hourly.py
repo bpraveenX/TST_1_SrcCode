@@ -543,7 +543,7 @@ def main():
                         app.reqPositions()
                         time.sleep(.5)
                         pos_df = app.pos_df
-                        pos_df.drop_duplicates(inplace=True,ignore_index=True)
+                        # pos_df.drop_duplicates(inplace=True,ignore_index=True)
                         crntLen = len(pos_df)
                         x22 = crntmsg.split("@")
                         buyval = float(x22[1])
