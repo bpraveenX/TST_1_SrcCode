@@ -100,6 +100,9 @@ portNum = cred_file.iloc[3][0].split('=')[1].strip()
 qty = cred_file.iloc[4][0].split('=')[1].strip()
 contractName = cred_file.iloc[5][0].split('=')[1].strip()
 
+discordChannel = discordChLink
+authorizationCode = authCode
+
 from discord import SyncWebhook
 
 webhook = SyncWebhook.from_url(webhook_link)
