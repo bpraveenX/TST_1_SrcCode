@@ -216,12 +216,7 @@ def main():
                 self.data[reqId] = pd.concat((self.data[reqId],pd.DataFrame([{"Date":bar.date,"Open":bar.open,"High":bar.high,"Low":bar.low,"Close":bar.close,"Volume":bar.volume}])))
                 #self.data[reqId].append({"Date":bar.date,"Open":bar.open,"High":bar.high,"Low":bar.low,"Close":bar.close,"Volume":bar.volume})
             # print("reqID:{}, date:{}, open:{}, high:{}, low:{}, close:{}, volume:{}".format(reqId,bar.date,bar.open,bar.high,bar.low,bar.close,bar.volume))
-            
-        def position(self, account, contract, position, avgCost):
-            super().position(account, contract, position, avgCost)
-            dictionary = {"Account":account, "Symbol": contract.symbol, "SecType": contract.secType,
-                          "Currency": contract.currency, "Position": position, "Avg cost": avgCost}
-            self.pos_df = self.pos_df.append(dictionary, ignore_index=True)
+        
     
     def usTechStk(symbol,expiry,sec_type="FUT",currency="USD",exchange="CME"):
         # ES is pulled from the CME exchange, not GLOBEX
