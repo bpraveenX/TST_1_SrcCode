@@ -750,6 +750,7 @@ def main():
                     
                         
                 prevmsg = crntmsg
+            print('read @ ',datetime.now())
                 
         except Exception as e:
              #print('type of error is ', type(e))
