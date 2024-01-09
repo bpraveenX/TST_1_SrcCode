@@ -96,7 +96,8 @@ cred_file = pd.read_csv('discord_cred_text.txt', header = None)
 webhook_link = cred_file.iloc[0][0].split('=')[1].strip()
 discordChLink = cred_file.iloc[1][0].split('=')[1].strip()
 authCode = cred_file.iloc[2][0].split('=')[1].strip()
-portNum = int(cred_file.iloc[3][0].split('=')[1].strip())
+portNum = cred_file.iloc[3][0].split('=')[1].strip()
+portNum = int(portNum)
 qty = cred_file.iloc[4][0].split('=')[1].strip()
 contractName = cred_file.iloc[5][0].split('=')[1].strip()
 
@@ -573,7 +574,7 @@ def main():
                         order_id = ordernum
                         print('in enter long')
                         # bktOrder(order_id,direction,quantity,lmt_price, sl_price, tp_price)
-                        bracket = bktOrder(order_id,"BUY",1,buyval,sllvl,tplvl)
+                        bracket = bktOrder(order_id,"BUY",int(qty),buyval,sllvl,tplvl)
                         try:
                             for ordr in bracket:
                                 app.placeOrder(ordr.orderId, contract, ordr)
@@ -622,7 +623,7 @@ def main():
                         print('in enter short')
                         
                         # bktOrder(order_id,direction,quantity,lmt_price, sl_price, tp_price)
-                        bracket = bktOrder(order_id,"SELL",qty,buyval,sllvl,tplvl)
+                        bracket = bktOrder(order_id,"SELL",int(qty),buyval,sllvl,tplvl)
                         for ordr in bracket:
                             app.placeOrder(ordr.orderId, contract, ordr)
                         ordernum = ordernum+3
