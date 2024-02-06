@@ -428,8 +428,11 @@ def main():
                     break
         except:
             time.sleep(.5)
-            
-    df[1] = pd.to_datetime(df[1],format = 'mixed')
+
+    try:
+        df[1] = pd.to_datetime(df[1],format = 'mixed')
+    except:
+        df[1] = pd.to_datetime(df[1])
     # df[1] = df[1].apply(lambda x:str(x)[:19])
     customUTC = timeInUTC.replace(minute = 0,second = 0)
     dffilt = df[df[1]>=customUTC]
