@@ -492,7 +492,7 @@ def main():
                         pos_df.drop_duplicates(inplace=True,ignore_index=True)
                         crntLen = len(pos_df)
                         x22 = crntmsg.split("@")
-                        
+                        lmt_price = round_nearest_qtr(float(x22[1]))
                         # order_id = app.nextValidOrderId
                         print('in enter long')
                         app.reqIds(-1)
@@ -503,7 +503,8 @@ def main():
                         # placing market order instead of brackt order
                         
                         # enter long order
-                        app.placeOrder(order_id,contract,marketOrder("BUY",qty))
+                        # app.placeOrder(order_id,contract,marketOrder("BUY",qty))
+                        app.placeOrder(order_id,contract,limitOrder("BUY",qty,lmt_price))
                         time.sleep(2)
                         app.reqPositions()
                         time.sleep(1)
@@ -532,6 +533,7 @@ def main():
                         crntLen = len(pos_df)
                         
                         x22 = crntmsg.split("@")
+                        lmt_price = round_nearest_qtr(float(x22[1]))
                         app.reqIds(-1)
                         time.sleep(1.5)
                         order_id = app.nextValidOrderId
@@ -539,7 +541,9 @@ def main():
                         print('in enter short')
                         
                         # enter short order
-                        app.placeOrder(order_id,contract,marketOrder("SELL",qty))
+                        # app.placeOrder(order_id,contract,marketOrder("SELL",qty))
+                        app.placeOrder(order_id,contract,limitOrder("SELL",qty,lmt_price))
+                        
                         time.sleep(2)
                         
                         app.reqPositions()
