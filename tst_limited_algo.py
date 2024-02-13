@@ -318,7 +318,8 @@ def main():
         try:
             ordernum  = app.nextValidOrderId
             print('established connection..')
-            send_discord_message("Connection established. Exit time is ",exitTime)
+            msg1 = "Connection established. Exit time is "+str(exitTime)
+            send_discord_message(msg1)
             break
         except Exception as e:
             print(e)
@@ -338,7 +339,8 @@ def main():
                 ordernum  = app.nextValidOrderId
                 print(ordernum)
                 print('established connection..')
-                send_discord_message("Connection established. Exit Time is ",exitTime)
+                msg1 = "Connection established. Exit time is "+str(exitTime)
+                send_discord_message(msg1)
                 time.sleep(.2)
                 break
             except:
