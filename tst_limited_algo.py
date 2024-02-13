@@ -174,6 +174,9 @@ def main():
         order.orderType = "LMT"
         order.totalQuantity = quantity
         order.lmtPrice = lmt_price
+        order.tif = "GTC" 
+        order.eTradeOnly = False 
+        order.firmQuoteOnly = False 
         return order
     
     def websocket_con():
