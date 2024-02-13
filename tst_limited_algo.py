@@ -8,6 +8,7 @@ import math
 import datetime
 from datetime import timedelta
 
+exitTime = datetime.datetime.now() + timedelta(minutes = 29, seconds = 55)
 import warnings
 warnings.filterwarnings("ignore")
 
@@ -317,7 +318,7 @@ def main():
         try:
             ordernum  = app.nextValidOrderId
             print('established connection..')
-            send_discord_message("Connection established")
+            send_discord_message("Connection established. Exit time is ",exitTime)
             break
         except Exception as e:
             print(e)
@@ -337,7 +338,7 @@ def main():
                 ordernum  = app.nextValidOrderId
                 print(ordernum)
                 print('established connection..')
-                send_discord_message("Connection established")
+                send_discord_message("Connection established. Exit Time is ",exitTime)
                 time.sleep(.2)
                 break
             except:
@@ -404,10 +405,10 @@ def main():
             crntmin = timeInNewYork.minute
             prevmin = crntmin
             dttemp = datetime.now()
-            if dttemp.minute < 29:
-                exitTime = dttemp.replace(minute = 29, second = 58)
-            else:
-                exitTime = dttemp.replace(minute = 59, second = 58)#pd.to_datetime(currentTimeInNewYork) + timedelta(minutes = 59, seconds = 50)
+            # if dttemp.minute < 29:
+            #     exitTime = dttemp.replace(minute = 29, second = 58)
+            # else:
+            #     exitTime = dttemp.replace(minute = 59, second = 58)#pd.to_datetime(currentTimeInNewYork) + timedelta(minutes = 59, seconds = 50)
             print('exitTime is ',exitTime)
         except:
             time.sleep(.5)
