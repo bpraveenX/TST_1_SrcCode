@@ -512,8 +512,8 @@ def main():
                         # placing market order instead of brackt order
                         
                         # enter long order
-                        # app.placeOrder(order_id,contract,marketOrder("BUY",qty))
-                        app.placeOrder(order_id,contract,limitOrder("BUY",qty,lmt_price))
+                        app.placeOrder(order_id,contract,marketOrder("BUY",qty))
+                        # app.placeOrder(order_id,contract,limitOrder("BUY",qty,lmt_price))
                         time.sleep(2)
                         app.reqPositions()
                         time.sleep(1)
@@ -550,8 +550,8 @@ def main():
                         print('in enter short')
                         
                         # enter short order
-                        # app.placeOrder(order_id,contract,marketOrder("SELL",qty))
-                        app.placeOrder(order_id,contract,limitOrder("SELL",qty,lmt_price))
+                        app.placeOrder(order_id,contract,marketOrder("SELL",qty))
+                        # app.placeOrder(order_id,contract,limitOrder("SELL",qty,lmt_price))
                         
                         time.sleep(2)
                         
