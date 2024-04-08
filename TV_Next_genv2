@@ -1,0 +1,81 @@
+//@version=5
+strategy("TST Fully Optimized Algo", overlay=true, initial_capital=30000, currency=currency.USD, default_qty_type=strategy.fixed, default_qty_value=2, process_orders_on_close=true)
+
+// Define inputs for Entry, Moving Average period, range filter, and SD multiplier
+fib_buy = input.float(23.6, title="Fib Level to Buy (%)", options=[12.0, 23.0, 23.6, 38.2, 50, 61.8, 78.6, 88.0, 100, 127.2, 141.4, 161.8, 261.8])
+range_filter = input.int(5, title="Range Filter (in points)", options=[5, 10, 15, 20, 25, 30])
+ma_period = input.int(44, title="Moving Average Period")
+sd_multiplier = input.float(2.0, title="Standard Deviation Multiplier")
+
+// Calculate Moving Average
+ma_val = ta.sma(close, ma_period)
+
+// Compute Standard Deviation
+sd_val = ta.stdev(close, ma_period)
+
+// Compute higher highs 
+hh = high > high[1]  
+
+// Compute lower lows
+ll = low < low[1] 
+
+// Check for consecutive rising or falling runs
+consecutive_rising = true
+for i = 1 to range_filter
+    consecutive_rising := consecutive_rising and hh[i]
+
+consecutive_falling = true
+for i = 1 to range_filter
+    consecutive_falling := consecutive_falling and ll[i]
+
+// Declare fib levels
+var float fib_0 = na
+var float fib_100 = na
+var float fib_buy_level_val = na
+var float ma_trailing_stop = na
+var float sd_stop_loss = na
+
+// Calculate and plot fib levels
+if consecutive_rising
+    // calculate fib levels for rising run
+    fib_0 := low[range_filter]
+    fib_100 := high
+    fib_buy_level_val := fib_0 + (fib_100 - fib_0) * fib_buy / 100
+    ma_trailing_stop := ma_val
+    sd_stop_loss := ma_val - sd_val * sd_multiplier
+
+if consecutive_falling
+    // calculate fib levels for falling run
+    fib_0 := high[range_filter]
+    fib_100 := low
+    fib_buy_level_val := fib_0 - (fib_0 - fib_100) * fib_buy / 100
+    ma_trailing_stop := ma_val
+    sd_stop_loss := ma_val + sd_val * sd_multiplier
+
+plot(series=ma_trailing_stop, color=color.red, title="MA Trailing Stop")
+plot(series=fib_buy_level_val, style=plot.style_circles, color=color.green, title="Fib Buy", linewidth=2, offset=-range_filter)
+plot(series=sd_stop_loss, color=color.orange, title="SD Stop Loss")
+
+// Place orders at fib level with MA trailing stop, SD stop loss, and range filter
+if (fib_buy_level_val != 0) and (high - low >= range_filter)  // Check range filter condition
+    if strategy.position_size == 0
+        if consecutive_rising
+            strategy.entry("buyLong", strategy.long, limit=fib_buy_level_val, stop=math.max(ma_trailing_stop, sd_stop_loss), comment="Enter Long @" + str.tostring(fib_buy_level_val) + " MA/SD SL @" + str.tostring(math.max(ma_trailing_stop, sd_stop_loss)))
+            alert("Buy")
+        if consecutive_falling
+            strategy.entry("sellShort", strategy.short, limit=fib_buy_level_val, stop=math.min(ma_trailing_stop, sd_stop_loss), comment="Enter Short @" + str.tostring(fib_buy_level_val) + " MA/SD SL @" + str.tostring(math.min(ma_trailing_stop, sd_stop_loss)))
+            alert("Sell")
+    if strategy.position_size > 0
+        if close >= fib_buy_level_val
+            strategy.exit("Long Take Profit", limit=fib_buy_level_val, comment="Exit Long TP")
+            alert("Take Profit")
+        if close <= math.min(ma_trailing_stop, sd_stop_loss)
+            strategy.exit("Long MA/SD Stop Loss", stop=math.min(ma_trailing_stop, sd_stop_loss), comment="Exit Long MA/SD SL")
+            alert("Stop Loss")
+    if strategy.position_size < 0
+        if close <= fib_buy_level_val
+            strategy.exit("Short Take Profit", limit=fib_buy_level_val, comment="Exit Short TP")
+            alert("Take Profit")
+        if close >= math.max(ma_trailing_stop, sd_stop_loss)
+            strategy.exit("Short MA/SD Stop Loss", stop=math.max(ma_trailing_stop, sd_stop_loss), comment="Exit Short MA/SD SL")
+            alert("Stop Loss")
