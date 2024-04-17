@@ -1,3 +1,4 @@
+
 ######## IMPORT PACKAGES ##############
 import numpy as np
 import pandas as pd
@@ -7,10 +8,10 @@ import math
 import datetime
 from datetime import timedelta
 
-exitTime = datetime.datetime.now() + timedelta(minutes=29, seconds=45)
 import warnings
 warnings.filterwarnings("ignore")
 
+# import yfinance as yf
 from datetime import datetime, timedelta
 from ibapi.client import EClient
 from ibapi.wrapper import EWrapper
@@ -29,25 +30,40 @@ import pytz
 
 import sys
 
-# ... (the rest of the code remains the same)
+
+# print(authCode)
+expiryValue = '202406'
+######### discord piece of code ##############
+# this is to retrieve messages from channel
 from discord import SyncWebhook
 
 def send_discord_message(message):
     webhook.send(message)
-    
-expiryValue = '202406'
-cred_file = pd.read_csv('C:\\Users\\Administrator\\Downloads\\next_gen_v2_cred_text.txt', header = None)
+
+
+# 
+cred_file = pd.read_csv('next-gen-cred-text.txt', header = None)
 webhook_link = cred_file.iloc[0][0].split('=')[1].strip()
 discordChLink = cred_file.iloc[1][0].split('=')[1].strip()
 authCode = cred_file.iloc[2][0].split('=')[1].strip()
-portNum = cred_file.iloc[3][0].split('=')[1].strip()
-qty = cred_file.iloc[4][0].split('=')[1].strip()
-contractName = cred_file.iloc[5][0].split('=')[1].strip()
-
+portnum = int(cred_file.iloc[3][0].split('=')[1].strip())
+qty = int(cred_file.iloc[4][0].split('=')[1].strip())
+contractname = cred_file.iloc[5][0].split('=')[1].strip()
+# TTB channel
 webhook = SyncWebhook.from_url(webhook_link)
 discordChannel = discordChLink
 authorizationCode = authCode
 
+# orders_excel = pd.read_excel('orders_excel.xlsx')
+# tdf = pd.DataFrame([1,1,'BUY',5100,5120,5050]).transpose()
+# tdf.columns = ['client_id','order_id','Side','enter_value','profit_value','loss_value']
+# tdf.to_excel('orders_excel.xlsx')
+# read client id
+# try:
+#     textClientId = pd.read_csv('clientIdValue.csv')
+# except:
+#     clientvalue = 0 
+    
 
 def retrieve_messages():
     headers = {
@@ -72,7 +88,9 @@ def retrieve_messages():
         
 
 def main():
-    # ... (the rest of the code remains the same)
+        
+    
+    
     class TradeApp(EWrapper, EClient):  # creating the tradeapp class with historicalData to be printed in dataframe
         def __init__(self): 
             EClient.__init__(self, self) 
@@ -114,10 +132,10 @@ def main():
                           "Exchange": contract.exchange, "Action": order.action, "OrderType": order.orderType,
                           "TotalQty": order.totalQuantity, "CashQty": order.cashQty, 
                           "LmtPrice": order.lmtPrice, "AuxPrice": order.auxPrice, "Status": orderState.status}
-            # self.order_df = self.order_df.append(dictionary, ignore_index=True)
             d1 = pd.DataFrame([dictionary])
             d2 = pd.concat([self.order_df,d1])
             self.order_df = d2
+            # self.order_df = self.order_df.append(dictionary, ignore_index=True)
             
         ######### uncomment code below if you want to see the data downloaded (historic)
         def historicalData(self, reqId, bar):
@@ -132,10 +150,9 @@ def main():
             super().position(account, contract, position, avgCost)
             dictionary = {"Account":account, "Symbol": contract.symbol, "SecType": contract.secType,
                           "Currency": contract.currency, "Position": position, "Avg cost": avgCost}
-            # self.pos_df = self.pos_df.append(dictionary, ignore_index=True)
             d1 = pd.DataFrame([dictionary])
             d2 = pd.concat([self.pos_df,d1])
-            self.pos_df = d2
+            self.pos_df = d2 #self.pos_df.append(dictionary, ignore_index=True)
     
     def usTechStk(symbol,expiry,sec_type="FUT",currency="USD",exchange="CME"):
         # ES is pulled from the CME exchange, not GLOBEX
@@ -167,9 +184,10 @@ def main():
         order.orderType = "LMT"
         order.totalQuantity = quantity
         order.lmtPrice = lmt_price
-        order.tif = "GTC" 
-        order.eTradeOnly = False 
-        order.firmQuoteOnly = False 
+        order.tif = 'GTC'
+        order.eTradeOnly = False
+        order.firmQuoteOnly = False
+        order.outsideRth = True
         return order
     
     def websocket_con():
@@ -189,8 +207,8 @@ def main():
         order.action = direction
         order.orderType = "MKT"
         order.totalQuantity = quantity
-        order.eTradeOnly = ''
-        order.firmQuoteOnly = ''
+        order.eTradeOnly = False
+        order.firmQuoteOnly = False
         order.tif = 'GTC'
         order.outsideRth = True
         return order
@@ -207,7 +225,6 @@ def main():
             #df_data[symbol].index= pd.DatetimeIndex(df_data[symbol].index).tz_convert("America/Indiana/Petersburg")
         return df_data
     
-    #creating object of the bracket order class - will be used as a parameter for other function calls
     #creating object of the bracket order class - will be used as a parameter for other function calls
     def bktOrder(order_id,direction,quantity,lmt_price, sl_price, tp_price):
         """
@@ -238,6 +255,7 @@ def main():
         parent.eTradeOnly = ''
         parent.firmQuoteOnly = ''
         parent.tif = "GTC"
+        # parent.conditionsIgnoreRth = True
         parent.outsideRth = True
         tdf = pd.DataFrame([order_id,direction])
         ordersummary = pd.concat([ordersummary,tdf.transpose()])
@@ -249,11 +267,13 @@ def main():
         slOrder.orderType = "STP" 
         slOrder.totalQuantity = quantity
         slOrder.auxPrice = sl_price
+        # slOrder.lmtPrice = sl_price - 5
         slOrder.parentId = order_id
         slOrder.transmit = False
         slOrder.eTradeOnly = ''
         slOrder.firmQuoteOnly = ''
         slOrder.tif = "GTC"
+        # slOrder.conditionsIgnoreRth = True
         slOrder.outsideRth = True
         tdf = pd.DataFrame([parent.orderId + 1,slOrder.action])
         ordersummary = pd.concat([ordersummary,tdf.transpose()])
@@ -269,20 +289,19 @@ def main():
         tpOrder.eTradeOnly = ''
         tpOrder.firmQuoteOnly = ''
         tpOrder.tif = "GTC"
+        # tpOrder.conditionsIgnoreRth = True
         tpOrder.outsideRth = True
         tdf = pd.DataFrame([parent.orderId + 2,tpOrder.action])
         ordersummary = pd.concat([ordersummary,tdf.transpose()])
         ordersummary.to_excel('ordersummary.xlsx')
-        bracket_order = [parent, slOrder, tpOrder]
+        bracket_order = [parent, slOrder, tpOrder] #
         # sample code : bracket = bktOrder(app.nextValidOrderId,"BUY",10,85,75,95)
         return bracket_order
-    
-    # app.placeOrder(order_id,usTechStk("FB"),marketOrder("BUY",1))
     
     clientId = 1
     
     app = TradeApp()
-    app.connect(host='127.0.0.1', port=int(portNum), clientId=clientId) #port 4002 for ib gateway paper trading/7497 for TWS paper trading
+    app.connect(host='127.0.0.1', port=7497, clientId=clientId) #port 4002 for ib gateway paper trading/7497 for TWS paper trading
     con_thread = threading.Thread(target=websocket_con, daemon=True)
     con_thread.start()
     time.sleep(1) # some latency added to ensure that the connection is established
@@ -293,7 +312,7 @@ def main():
     
     tickers = ["ES"]
     contract = Contract()
-    contract.symbol = contractName
+    contract.symbol = "ES"
     contract.secType = "FUT"
     contract.exchange = "CME"
     contract.currency = "USD"
@@ -309,9 +328,9 @@ def main():
             break
         try:
             ordernum  = app.nextValidOrderId
+            time.sleep(1)
             print('established connection..')
-            msg1 = "Connection established. Exit time is: "+str(exitTime)
-            send_discord_message(msg1)
+            send_discord_message("Connection established")
             break
         except Exception as e:
             print(e)
@@ -322,7 +341,7 @@ def main():
             time.sleep(1)
             print('restarting TWS connection')
             app = TradeApp()
-            app.connect(host='127.0.0.1', port=int(portNum), clientId=clientId) #port 4002 for ib gateway paper trading/7497 for TWS paper trading
+            app.connect(host='127.0.0.1', port=7497, clientId=clientId) #port 4002 for ib gateway paper trading/7497 for TWS paper trading
             con_thread = threading.Thread(target=websocket_con, daemon=True)
             con_thread.start()
             time.sleep(1) # some latency added to ensure that the connection is established
@@ -331,8 +350,7 @@ def main():
                 ordernum  = app.nextValidOrderId
                 print(ordernum)
                 print('established connection..')
-                msg1 = "Connection established. Exit time is: "+str(exitTime)
-                send_discord_message(msg1)
+                send_discord_message("Connection established")
                 time.sleep(.2)
                 break
             except:
@@ -370,9 +388,6 @@ def main():
     
     deltaHours = 0
     
-    # order_id = app.nextValidOrderId
-    # app.placeOrder(order_id, contract, marketOrder("BUY",1))
-    
     if (systemTime - pd.to_datetime(currentTimeInUTC)) < timedelta(minutes = 1):
         deltaHours = 0 
     elif (systemTime - pd.to_datetime(currentTimeInNewYork)) < timedelta(minutes = 1):
@@ -398,188 +413,379 @@ def main():
             prevhour = crnthour
             crntmin = timeInNewYork.minute
             prevmin = crntmin
-            dttemp = datetime.now()
-            # if dttemp.minute < 29:
-            #     exitTime = dttemp.replace(minute = 29, second = 58)
-            # else:
-            #     exitTime = dttemp.replace(minute = 59, second = 58)#pd.to_datetime(currentTimeInNewYork) + timedelta(minutes = 59, seconds = 50)
+            exitTime = pd.to_datetime(currentTimeInNewYork) + timedelta(minutes = 59, seconds = 50)
             print('exitTime is ',exitTime)
         except:
             time.sleep(.5)
         
-    # print('exitTime is ',exitTime)
     # code to handle trades that are placed exactly during the code refresh time
     # check for edge of hourly messages missing trades
     headers = {
         'authorization':authorizationCode
         }
-
-    df = pd.DataFrame()
-    while len(df) == 0:
-        try:
-            r = requests.get(discordChannel,headers = headers)
-            
-            jobj = json.loads(r.text)
-            i = 0
-            
-            # code for the edge case of hourly messages
-            
-            # first reading when previous code shutdown
-            
-            for value in jobj:
-                i += 1
-                print(value['content'],"\n")
-                df = pd.concat([df,pd.DataFrame([value['content'],value['timestamp']]).transpose()]) # contains discord messages
-                if i > 4:
-                    break
-        except:
-            time.sleep(.5)
-            
-    df[1] = pd.to_datetime(df[1])
-    # df[1] = df[1].apply(lambda x:str(x)[:19])
-    customUTC = timeInUTC.replace(minute = 0,second = 0)
-    dffilt = df[df[1]>=customUTC]
     
-    print('dffilt is :')
-    print(dffilt)
-    if len(dffilt)>0:
-        
-        for i in range(0,len(dffilt)):
-            # print(dffilt.iloc[i][0])
-            if 'ES1' in dffilt.iloc[i][0]:
-                print('in loop:',i)
-                crntmsg = dffilt.iloc[i][0]
-                print('ES1! trade found during transition!!')
-                # place order
-                print(crntmsg)
-                
-                
-    ####################
+    r = requests.get(discordChannel,headers = headers)
+    
+    jobj = json.loads(r.text)
+    i = 0
     
     
-    while datetime.now() < exitTime:
+    while 0 < 1:
+        # print(i)
         if breakcode == 1:
             break
         timeInNewYork = datetime.now(newYorkTz)
-        try:
+        try: # running the whole code in try except loop to check for errors
             msg = retrieve_messages()
+            # print(datetime.now())
             crntmsg = msg.iloc[0][0]
             crntmtime = msg.iloc[0][1]
+            # print([crntmtime,datetime.now()])
             prevhour = crnthour
             crnthour = timeInNewYork.hour
-
+            
+                
             prevmin = crntmin
             crntmin = timeInNewYork.minute
-
-            crntmtime = pd.to_datetime(crntmtime) - timedelta(hours=deltaHours)
-
-            if str(crntmtime) > str(datetime.now() - timedelta(seconds=155)):
-                if crntmsg != prevmsg:
+            
+            crntmtime = pd.to_datetime(crntmtime) - timedelta(hours = deltaHours)
+            # 
+            if str(crntmtime) > str(datetime.now() - timedelta(seconds = 155)):
+                # it is a recent message
+                
+                if crntmsg!=prevmsg: 
                     print(crntmsg)
                     if 'Enter Long' in crntmsg:
-                        # Enter long trade
+                        # enter long trade - bracket order
+                        # in current message: entry level, tp level, sl level
+                        app.reqPositions()
+                        time.sleep(1)
+                        pos_df = app.pos_df
+                        pos_df.drop_duplicates(inplace=True,ignore_index=True)
+                        crntLen = len(pos_df)
                         x22 = crntmsg.split("@")
-                        lmt_price = round_nearest_qtr(float(x22[1]))
-                        sl_price = round_nearest_qtr(float(x22[-1].split("SL")[-1]))
-                        order_id = app.nextValidOrderId
-                        app.placeOrder(order_id, contract, limitOrder("BUY", qty, lmt_price))
-                        app.placeOrder(order_id + 1, contract, stopOrder("SELL", qty, sl_price, transmit=True))
-
+                        buyval = float(x22[1].split(' ')[0])
+                        buyval = round_nearest_qtr(buyval)
+                        sllvl = float(x22[2])
+                        sllvl = round_nearest_qtr(sllvl)
+                        tplvl = buyval + 100
+                        
+                        if sllvl > buyval:
+                            send_discord_message('SL is greater than Entry value when going long, error with logic.. please check!')
+                        else:
+                            # sllvl = float(x22[3])
+                            # sllvl = round_nearest_qtr(sllvl)
+                            print([buyval,tplvl,sllvl])
+                            # order_id = app.nextValidOrderId
+                            order_id = ordernum
+                            print('in enter long')
+                            
+                            # bktOrder(order_id,direction,quantity,lmt_price, sl_price, tp_price)
+                            bracket = bktOrder(order_id,"BUY",qty,buyval,sllvl,tplvl)
+                            try:
+                                for ordr in bracket:
+                                    app.placeOrder(ordr.orderId, contract, ordr)
+                            except:
+                                print('error found')
+                                
+                            contract.eTradeOnly = None
+                            
+                            app.reqPositions()
+                            time.sleep(2)
+                            pos_df = app.pos_df
+                            pos_df.drop_duplicates(inplace=True,ignore_index=True)
+                            postLen = len(pos_df)
+                            
+                            ordernum = ordernum+3
+                            if postLen > crntLen:
+                                send_discord_message("Order placed in TWS")
+                            else:
+                                send_discord_message('Order didnt go through!')
+                        
+                    elif 'Exit Long TP' in crntmsg:
+                        # exit : in bracket order have to cancel open limit orders
+                        # order_id = app.nextValidOrderId - 1 ## check if this logic works
+                        app.reqPositions()
+                        time.sleep(1)
+                        pos_df = app.pos_df
+                        time.sleep(1)
+                        if len(pos_df) > 0:
+                            if contractname in pos_df['Symbol'].unique():
+                                if pos_df[pos_df['Symbol'] == contractname]['Position'].sum() > 0: 
+                                    app.reqIds(-1)
+                                    time.sleep(1)
+                                    ordernum  = app.nextValidOrderId
+                                    time.sleep(1)
+                                    order_id = ordernum #- 3
+                                    # qty = 1
+                                    print('found a long contract open, going ahead and exiting for profit!')
+                                    app.placeOrder(order_id,contract,marketOrder("SELL",qty))
+                                    # now cancel the stop loss and take profit orders..
+                                    time.sleep(2)
+                        app.reqGlobalCancel()
+                        send_discord_message('TP order executed for the existing long contract!')
+                        app.reqIds(-1)
+                        time.sleep(2)
+                        ordernum  = app.nextValidOrderId
+                        # app.cancelOrder(order_id)
+                        
                     elif 'Enter Short' in crntmsg:
-                        # Enter short trade
+                        # enter short trade - bracket order
+                        # in current message: entry level, tp level, sl level
+                        app.reqPositions()
+                        time.sleep(1)
+                        pos_df = app.pos_df
+                        pos_df.drop_duplicates(inplace=True,ignore_index=True)
+                        crntLen = len(pos_df)
                         x22 = crntmsg.split("@")
-                        lmt_price = round_nearest_qtr(float(x22[1]))
-                        sl_price = round_nearest_qtr(float(x22[-1].split("SL")[-1]))
-                        order_id = app.nextValidOrderId
-                        app.placeOrder(order_id, contract, limitOrder("SELL", qty, lmt_price))
-                        app.placeOrder(order_id + 1, contract, stopOrder("BUY", qty, sl_price, transmit=True))
-
-                    elif 'Exit Long TP' in crntmsg or 'Exit Long MA/SD SL' in crntmsg:
-                        # Exit long trade (take profit or stop loss)
+                        buyval = float(x22[1].split(' ')[0])
+                        buyval = round_nearest_qtr(buyval)
+                        sllvl = float(x22[2])
+                        sllvl = round_nearest_qtr(sllvl)
+                        tplvl = buyval - 100
+                        
+                        print([buyval,tplvl,sllvl])
+                        
+                        order_id = ordernum
+                        # order_id = app.nextValidOrderId
+                        print('in enter short')
+                        
+                        # bktOrder(order_id,direction,quantity,lmt_price, sl_price, tp_price)
+                        bracket = bktOrder(order_id,"SELL",qty,buyval,sllvl,tplvl)
+                        for ordr in bracket:
+                            app.placeOrder(ordr.orderId, contract, ordr)
+                        ordernum = ordernum+3
+                        
+                        ##########
+                        # code to modify order for take profit levels
+                        # app.placeOrder(order_id, contract, limitOrder(direction,quantity,lmt_price))
+                        
+                        ################
+                        app.reqIds(-1)
+                        time.sleep(2)
+                        ordernum  = app.nextValidOrderId
+                        
+                        app.reqPositions()
+                        time.sleep(1)
+                        pos_df = app.pos_df
+                        pos_df.drop_duplicates(inplace=True,ignore_index=True)
+                        postLen = len(pos_df)
+                        
+                        if postLen > crntLen:
+                            send_discord_message("Order placed in TWS")
+                        else:
+                            send_discord_message('Order didnt go through!')
+                        
+                    elif 'Exit Short TP' in crntmsg:
+                        # exit : in bracket order have to cancel open limit orders
+                        # order_id = app.nextValidOrderId - 1 ## check if this logic works
+                        # order_id = ordernum - 3
+                        # app.cancelOrder(order_id)
+                        app.reqPositions()
+                        time.sleep(1)
+                        pos_df = app.pos_df
+                        time.sleep(1)
+                        if len(pos_df) > 0:
+                            if contractname in pos_df['Symbol'].unique():
+                                if pos_df[pos_df['Symbol'] == contractname]['Position'].sum() < 0: 
+                                    # currently in short position for ES based on the position size seen from here. 
+                                    app.reqIds(-1)
+                                    time.sleep(1)
+                                    ordernum  = app.nextValidOrderId
+                                    time.sleep(1)
+                                    order_id = ordernum #- 3
+                                    # qty = 1
+                                    print('found a short contract open, going ahead and exiting for profit!')
+                                    app.placeOrder(order_id,contract,marketOrder("BUY",qty))
+                                    # now cancel the stop loss and take profit orders..
+                                    time.sleep(2)
                         app.reqGlobalCancel()
-
-                    elif 'Exit Short TP' in crntmsg or 'Exit Short MA/SD SL' in crntmsg:
-                        # Exit short trade (take profit or stop loss)
+                        send_discord_message('TP order executed for the existing short contract!')
+                        app.reqIds(-1)
+                        time.sleep(2)
+                        ordernum  = app.nextValidOrderId
+                        
+                    elif 'report status' in crntmsg:
+                        # this is to send details of how the bot is working
+                        cstr = 'last TWS connection was at:'+str(app.twsConnectionTime())
+                        send_discord_message(cstr)
+                        
+                        
+                        
+                    elif 'time left' in crntmsg:
+                        timeleft = exitTime - datetime.now()
+                        cstr = "code will end in "+str(timeleft.seconds)+ " seconds."
+                        send_discord_message(cstr)
+                        time.sleep(.1)
+                        
+                    elif 'close all orders' in crntmsg:
+                        app.reqPositions()
+                        time.sleep(1)
+                        pos_df = app.pos_df
+                        pos_df.drop_duplicates(inplace=True,ignore_index=True)
+                        crntLen = len(pos_df)
+                        time.sleep(1)
+                        # got the current position above
+                        # startIdx = len(pos_df) - 5 
+                        # if startIdx < 0:
+                        startIdx = 0
+                        for pos in range(startIdx,len(pos_df)):
+                            po = pos_df['Position'].iloc[pos]
+                            ordType = ''
+                            ordernum = app.nextValidOrderId
+                            order_id = ordernum
+                            posQty = 0
+                            if po < 0:
+                                ordType = 'BUY'
+                                posQty = int(po * -1)
+                            elif po > 0:
+                                ordType = 'SELL'
+                                posQty = int(po)
+                                
+                            if len(ordType)>1:
+                                app.placeOrder(order_id, contract, marketOrder(ordType,posQty))
+                                app.reqIds(-1)
+                                time.sleep(1)
+                        
+                        app.reqPositions()
+                        time.sleep(1)
+                        pos_df = app.pos_df
+                        pos_df.drop_duplicates(inplace=True,ignore_index=True)
+                        postLen = len(pos_df)
+                        if postLen > crntLen:
+                            
+                            send_discord_message('closed all contracts..')
+                        else:
+                            send_discord_message('couldnt close the contracts! please check again!')
+                            
+                        time.sleep(.1)
+                    elif 'cancel all open order' in crntmsg:
+                        
+                        # command to cancel all open orders
                         app.reqGlobalCancel()
-
-                prevmsg = crntmsg
-            print('read @', datetime.now())
-        except Exception as e:
-            #print('type of error is ', type(e))
-            df3 = pd.DataFrame([e])
-            #print(df3)
-            if 'positional indexer' in str(df3[0].iloc[0]):
-                print('in except refresh connection loop')
-                #refresh connection
-                while True:
-                    try:
-                        retryConnection += 1
-                        clientId += 1
-                        del app
-                        del con_thread
-                        time.sleep(.5)
-                        print('restarting TWS connection')
-                        app = TradeApp()
-                        app.connect(host='127.0.0.1', port=int(portNum), clientId=clientId) #port 4002 for ib gateway paper trading/7497 for TWS paper trading
-                        con_thread = threading.Thread(target=websocket_con, daemon=True)
-                        con_thread.start()
-                        time.sleep(1) # some latency added to ensure that the connection is established
+                        
+                        
+                        # break
+                    elif 'refresh connection' in crntmsg:
+                        # providing code to refresh connection to TWS through Nic's discord bots
+                        
                         try:
-                            ordernum  = app.nextValidOrderId
-                            print(ordernum)
-                            cstr = "TWS connection re established with Client ID: "+str(clientId)
-                            send_discord_message(cstr)
-                            # break
-                            retryConnection= 0
+                            retryConnection += 1
+                            clientId += 1
+                            del app
+                            del con_thread
+                            time.sleep(.5)
+                            print('restarting TWS connection')
+                            app = TradeApp()
+                            app.connect(host='127.0.0.1', port=7497, clientId=clientId) #port 4002 for ib gateway paper trading/7497 for TWS paper trading
+                            con_thread = threading.Thread(target=websocket_con, daemon=True)
+                            con_thread.start()
+                            time.sleep(1) # some latency added to ensure that the connection is established
+                            try:
+                                ordernum  = app.nextValidOrderId
+                                print(ordernum)
+                                cstr = "TWS connection re established with Client ID: "+str(clientId)
+                                send_discord_message(cstr)
+                                # break
+                                retryConnection= 0
+                            except Exception as e:
+                                print(e)
+                                if retryConnection > 10:
+                                    send_discord_message("TWS connection FAILED..")
+                                    time.sleep(.5)
+                                    break
+                                pass
                         except Exception as e:
-                            print(df3)
-                            if retryConnection > 10:
-                                send_discord_message("TWS connection FAILED..")
+                            print(e)
+                            
+                            retryConnection += 1
+                            if retryConnection > 12:
+                                print('couldnt establish connection, please check manually')
+                                time.sleep(.6)
+                                print('message 2')
+                                send_discord_message("ERROR in re establishing connection! Please check immediately!!!!!!!")
+                                time.sleep(1)
                                 breakcode = 1
-                                time.sleep(.5)
                                 break
-                            pass
-                    except Exception as e:
-                        print(e)
                         
-                        retryConnection += 1
-                        if retryConnection > 12:
-                            print('couldnt establish connection, please check manually')
-                            time.sleep(.6)
-                            print('message 2')
-                            send_discord_message("ERROR in re establishing connection! Please check immediately!!!!!!!")
-                            time.sleep(1)
-                            breakcode = 1
-                            break
+                    
                         
-            elif "find order with id" in str(df3[0].iloc[0]):
-                print('in loop..')
-                ordernum  = app.nextValidOrderId
-                order_id = ordernum
-                app.placeOrder(order_id, contract, marketOrder(ordType,posQty))
-                send_discord_message('placed order after revising order number..')
-                time.sleep(.4)
+                prevmsg = crntmsg
                 
-            elif "Order rejected - reason:Parent order is being cancelled." in str(df3[0].iloc[0]):
-                ordernum  = app.nextValidOrderId
-                order_id = ordernum
-                app.placeOrder(order_id, contract, marketOrder(ordType,posQty))
-                send_discord_message('placed order after revising order number..')
-                time.sleep(.4)
-                
-            if error_inc < 3:
-                #errorFile = r"errorLog_" + folder_time+".txt"
-                #print(df3)
-                # error_message = traceback.format_exc()
-                # error_payload = {'content': f"Error in script: {error_message}"}
-                #df3 = pd.DataFrame([e])
-                #df3.to_csv(errorFile, header=None, index=None, sep=' ', mode='a')
-                # print('in error loop')
-                time.sleep(1) # to give it a min and see if we can re run code.
-            else:
-                break
+        except Exception as e:
+             print('type of error is ', type(e))
+             df3 = pd.DataFrame([e])
+             print(df3)
+             if 'positional indexer' in str(df3[0].iloc[0]):
+                 print('in except refresh connection loop')
+                 #refresh connection
+                 while True:
+                     try:
+                         retryConnection += 1
+                         clientId += 1
+                         del app
+                         del con_thread
+                         time.sleep(.5)
+                         print('restarting TWS connection')
+                         app = TradeApp()
+                         app.connect(host='127.0.0.1', port=7497, clientId=clientId) #port 4002 for ib gateway paper trading/7497 for TWS paper trading
+                         con_thread = threading.Thread(target=websocket_con, daemon=True)
+                         con_thread.start()
+                         time.sleep(1) # some latency added to ensure that the connection is established
+                         try:
+                             ordernum  = app.nextValidOrderId
+                             print(ordernum)
+                             cstr = "TWS connection re established with Client ID: "+str(clientId)
+                             send_discord_message(cstr)
+                             # break
+                             retryConnection= 0
+                         except Exception as e:
+                             print(df3)
+                             if retryConnection > 10:
+                                 send_discord_message("TWS connection FAILED..")
+                                 breakcode = 1
+                                 time.sleep(.5)
+                                 break
+                             pass
+                     except Exception as e:
+                         print(e)
+                         
+                         retryConnection += 1
+                         if retryConnection > 12:
+                             print('couldnt establish connection, please check manually')
+                             time.sleep(.6)
+                             print('message 2')
+                             send_discord_message("ERROR in re establishing connection! Please check immediately!!!!!!!")
+                             time.sleep(1)
+                             breakcode = 1
+                             break
+                         
+             elif "find order with id" in str(df3[0].iloc[0]):
+                 print('in loop..')
+                 ordernum  = app.nextValidOrderId
+                 order_id = ordernum
+                 app.placeOrder(order_id, contract, marketOrder(ordType,posQty))
+                 send_discord_message('placed order after revising order number..')
+                 time.sleep(.4)
+                 
+             elif "Order rejected - reason:Parent order is being cancelled." in str(df3[0].iloc[0]):
+                 ordernum  = app.nextValidOrderId
+                 order_id = ordernum
+                 app.placeOrder(order_id, contract, marketOrder(ordType,posQty))
+                 send_discord_message('placed order after revising order number..')
+                 time.sleep(.4)
+                 
+             if error_inc < 3:
+                 errorFile = r"errorLog_" + folder_time+".txt"
+                 print(df3)
+                 # error_message = traceback.format_exc()
+                 # error_payload = {'content': f"Error in script: {error_message}"}
+                 df3 = pd.DataFrame([e])
+                 df3.to_csv(errorFile, header=None, index=None, sep=' ', mode='a')
+                 time.sleep(1) # to give it a min and see if we can re run code.
+             else:
+                 break
         
-        time.sleep(1)
         
     # time.sleep(1)
     print([crnthour,prevhour])
@@ -595,4 +801,10 @@ if __name__ == '__main__':
     timeInUTC = datetime.now(UtcTz)
     currentTimeInNewYork = timeInNewYork.strftime("%H:%M:%S")
     currentTimeInUTC = timeInUTC.strftime("%H:%M:%S")
+    
+    
 
+
+
+# tdf = pd.read_excel('temp.xlsx')
+# t2 = tdf[tdf['Unnamed: 0'].str.contains("Upward X/Upward X+")]
