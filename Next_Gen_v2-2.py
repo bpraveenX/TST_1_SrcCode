@@ -6,7 +6,7 @@ import operator
 import math
 import datetime
 from datetime import timedelta
-
+ 
 exitTime = datetime.datetime.now() + timedelta(minutes=29, seconds=45)
 import warnings
 warnings.filterwarnings("ignore")
