@@ -75,6 +75,7 @@ def main():
     class TradeApp(EWrapper, EClient):
         def __init__(self):
             EClient.__init__(self, self)
+            self.nextValidOrderId = None  
             self.acc_summary = pd.DataFrame(columns=['ReqId', 'Account', 'Tag', 'Value', 'Currency'])
             self.pnl_summary = pd.DataFrame(columns=['ReqId', 'DailyPnL', 'UnrealizedPnL', 'RealizedPnL'])
             self.order_df = pd.DataFrame(columns=['PermId', 'ClientId', 'OrderId',
