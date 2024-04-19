@@ -337,7 +337,7 @@ def main():
 
     crntmsg = '1'
     prevmsg = '2'
-    exitTime = datetime.now() + timedelta(minutes=59, seconds=50)
+    exitTime = datetime.now() + timedelta(minutes=29, seconds=50)
     print('exitTime is ', exitTime)
     while crntmsg != prevmsg:
         try:
