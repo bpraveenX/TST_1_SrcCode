@@ -337,7 +337,8 @@ def main():
 
     crntmsg = '1'
     prevmsg = '2'
-
+    exitTime = datetime.now() + timedelta(minutes=59, seconds=50)
+    print('exitTime is ', exitTime)
     while crntmsg != prevmsg:
         try:
             msg = retrieve_messages()
@@ -348,8 +349,7 @@ def main():
             prevhour = crnthour
             crntmin = timeInNewYork.minute
             prevmin = crntmin
-            exitTime = pd.to_datetime(currentTimeInNewYork) + timedelta(minutes=59, seconds=50)
-            print('exitTime is ', exitTime)
+            
         except:
             time.sleep(.5)
 
