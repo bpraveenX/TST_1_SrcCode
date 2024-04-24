@@ -294,8 +294,8 @@ def main():
                 ordernum = app.nextValidOrderId
                 print(ordernum)
                 print('established connection..')
-                msg1 = "Connection established. Exit time is " + str(exitTime)
-                send_discord_message(msg1)
+                #msg1 = "Connection established. Exit time is " + str(exitTime)
+                #send_discord_message(msg1)
                 time.sleep(.2)
                 break
             except:
