@@ -404,9 +404,9 @@ def main():
                             
                         time.sleep(2)
                         app.reqPositions()
-                        time.sleep(1)
+                        time.sleep(1.8)
                         pos_df = app.pos_df
-                        time.sleep(.8)
+                        time.sleep(1.8)
                         postLen = len(pos_df)
                         
                         if postLen > crntLen:
@@ -422,11 +422,11 @@ def main():
                         time.sleep(1)
                         order_id = app.nextValidOrderId 
                         app.reqPositions() 
-                        time.sleep(1) 
+                        time.sleep(1.8) 
                         pos_df = app.pos_df 
                         if pos_df[pos_df['Symbol'] == contractName].iloc[0]['Position']>0:
                            app.placeOrder(order_id,contract,marketOrder("SELL",qty))
-                        time.sleep(.9) 
+                        time.sleep(1.9) 
                         app.reqGlobalCancel() 
                         time.sleep(2) 
                         send_discord_message('Exited Long..')
@@ -461,9 +461,9 @@ def main():
                         time.sleep(2)
                         
                         app.reqPositions()
-                        time.sleep(1)
+                        time.sleep(1.8)
                         pos_df = app.pos_df
-                        time.sleep(.8)
+                        time.sleep(1.8)
                         postLen = len(pos_df)
                         
                         if postLen > crntLen:
@@ -477,11 +477,11 @@ def main():
                         time.sleep(1)
                         order_id = app.nextValidOrderId 
                         app.reqPositions() 
-                        time.sleep(1) 
+                        time.sleep(1.8) 
                         pos_df = app.pos_df 
                         if pos_df[pos_df['Symbol'] == contractName].iloc[0]['Position']<0:
                            app.placeOrder(order_id,contract,marketOrder("BUY",qty))
-                        time.sleep(.9) 
+                        time.sleep(1.9) 
                         app.reqGlobalCancel() 
                         time.sleep(2) 
                         send_discord_message('Exited Short..')
