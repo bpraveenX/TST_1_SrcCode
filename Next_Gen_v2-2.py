@@ -357,105 +357,6 @@ def main():
         'authorization': authorizationCode
     }
 
-    # df = pd.DataFrame()
-    # while len(df) == 0:
-    #     try:
-    #         r = requests.get(discordChannel, headers=headers)
-
-    #         jobj = json.loads(r.text)
-    #         i = 0
-
-    #         # code for the edge case of hourly messages
-            
-    #         # first reading when previous code shutdown
-            
-    #         for value in jobj:
-    #             i += 1
-    #             print(value['content'],"\n")
-    #             df = pd.concat([df,pd.DataFrame([value['content'],value['timestamp']]).transpose()]) # contains discord messages
-    #             if i > 4:
-    #                 break
-    #     except:
-    #         time.sleep(.5)
-
-    # try:
-    #     df[1] = pd.to_datetime(df[1])
-    # except:
-    #     df[1] = pd.to_datetime(df[1],format = 'mixed') 
-    # customUTC = timeInUTC.replace(minute = 0,second = 0)
-    # dffilt = df[df[1]>=customUTC]
-    
-    # print('dffilt is :')
-    # print(dffilt)
-    # if len(dffilt)>0:
-        
-    #     for i in range(0,len(dffilt)):
-    #         if contractName in dffilt.iloc[i][0]:
-    #             print('in loop:',i)
-    #             crntmsg = dffilt.iloc[i][0]
-    #             print(contractName + '! trade found during transition!!')
-    #             # place order
-    #             print(crntmsg)
-                
-    #             if 'Enter Long' in crntmsg or 'Close entry(s) order Short' in crntmsg or 'vi enter long' in crntmsg:
-    #                 # enter long trade - bracket order
-    #                 # in current message: entry level, tp level, sl level
-    #                 app.reqPositions()
-    #                 time.sleep(.5)
-    #                 pos_df = app.pos_df
-    #                 pos_df.drop_duplicates(inplace=True,ignore_index=True)
-    #                 crntLen = len(pos_df)
-    #                 x22 = crntmsg.split("@")
-    #                 lmt_price = round_nearest_qtr(float(x22[1]))
-    #                 app.reqIds(-1)
-    #                 time.sleep(1.5)
-    #                 order_id = app.nextValidOrderId
-    #                 print('in enter long')
-    #                 # enter long order
-    #                 app.placeOrder(order_id,contract,marketOrder("BUY",qty))
-    #                 time.sleep(2)
-    #                 app.reqPositions()
-    #                 time.sleep(1)
-    #                 pos_df = app.pos_df
-    #                 postLen = len(pos_df)
-                    
-    #                 if postLen > crntLen:
-    #                     send_discord_message("Order placed in TWS")
-    #                 else:
-    #                     send_discord_message('Order didnt go through!')
-                        
-    #             elif 'Enter Short' in crntmsg or 'Close entry(s) order Long' in crntmsg or 'vi enter short' in crntmsg:
-    #                 # enter short trade - bracket order
-    #                 # in current message: entry level, tp level, sl level
-    #                 app.reqPositions()
-    #                 time.sleep(.5)
-    #                 pos_df = app.pos_df
-    #                 pos_df.drop_duplicates(inplace=True,ignore_index=True)
-    #                 crntLen = len(pos_df)
-                    
-    #                 x22 = crntmsg.split("@")
-    #                 lmt_price = round_nearest_qtr(float(x22[1]))
-    #                 app.reqIds(-1)
-    #                 time.sleep(1.5)
-    #                 order_id = app.nextValidOrderId
-    #                 print('in enter short')
-                    
-    #                 # enter short order
-    #                 app.placeOrder(order_id,contract,marketOrder("SELL",qty))
-                    
-    #                 time.sleep(2)
-                    
-    #                 app.reqPositions()
-    #                 time.sleep(1)
-    #                 pos_df = app.pos_df
-    #                 postLen = len(pos_df)
-                    
-    #                 if postLen > crntLen:
-    #                     send_discord_message("Order placed in TWS")
-    #                 else:
-    #                     send_discord_message('Order didnt go through!')
-                        
-    ####################
     
     while datetime.now() < exitTime:
         if breakcode == 1:
@@ -486,13 +387,21 @@ def main():
                         pos_df.drop_duplicates(inplace=True,ignore_index=True)
                         crntLen = len(pos_df)
                         x22 = crntmsg.split("@")
-                        lmt_price = round_nearest_qtr(float(x22[1]))
+                        lmt_price = round_nearest_qtr(float(x22[1].split(' ')[0]))
+                        stp_price = round_nearest_qtr(float(x22[-1]))
                         app.reqIds(-1)
                         time.sleep(1.5)
                         order_id = app.nextValidOrderId
                         print('in enter long')
                         # enter long order
-                        app.placeOrder(order_id,contract,marketOrder("BUY",qty))
+                        # app.placeOrder(order_id,contract,marketOrder("BUY",qty))
+                        bracket = bktOrder(order_id,"BUY",1,lmt_price,stp_price,lmt_price+100)
+                        try:
+                            for ordr in bracket:
+                                app.placeOrder(ordr.orderId, contract, ordr)
+                        except:
+                            print('error found')
+                            
                         time.sleep(2)
                         app.reqPositions()
                         time.sleep(1)
@@ -506,8 +415,20 @@ def main():
                         
                     elif 'Exit Long' in crntmsg:
                         # exit : in bracket order have to cancel open limit orders
-                        order_id = ordernum - 3
-                        app.cancelOrder(order_id)
+                        # order_id = ordernum - 3
+                        # app.cancelOrder(order_id)
+                        app.reqIds(-1)
+                        time.sleep(1)
+                        order_id = app.nextValidOrderId 
+                        app.reqPositions() 
+                        time.sleep(1) 
+                        pos_df = app.pos_df 
+                        if pos_df[pos_df['Symbol'] == contractName].iloc[0]['Position']>0:
+                           app.placeOrder(order_id,contract,marketOrder("SELL",qty))
+                        time.sleep(.9) 
+                        app.reqGlobalCancel() 
+                        time.sleep(2) 
+                        send_discord_message('Exited Long..')
                         
                     elif 'Enter Short' in crntmsg or 'Close entry(s) order Long' in crntmsg or 'vi enter short' in crntmsg:
                         # enter short trade - bracket order
@@ -542,8 +463,18 @@ def main():
                         
                     elif 'Exit Short' in crntmsg:
                         # exit : in bracket order have to cancel open limit orders
-                        order_id = ordernum - 3
-                        app.cancelOrder(order_id)
+                        app.reqIds(-1)
+                        time.sleep(1)
+                        order_id = app.nextValidOrderId 
+                        app.reqPositions() 
+                        time.sleep(1) 
+                        pos_df = app.pos_df 
+                        if pos_df[pos_df['Symbol'] == contractName].iloc[0]['Position']<0:
+                           app.placeOrder(order_id,contract,marketOrder("BUY",qty))
+                        time.sleep(.9) 
+                        app.reqGlobalCancel() 
+                        time.sleep(2) 
+                        send_discord_message('Exited Short..')
                         
                     elif 'report status' in crntmsg:
                         # this is to send details of how the bot is working
