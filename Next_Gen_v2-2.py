@@ -406,6 +406,7 @@ def main():
                         app.reqPositions()
                         time.sleep(1)
                         pos_df = app.pos_df
+                        time.sleep(.8)
                         postLen = len(pos_df)
                         
                         if postLen > crntLen:
@@ -462,6 +463,7 @@ def main():
                         app.reqPositions()
                         time.sleep(1)
                         pos_df = app.pos_df
+                        time.sleep(.8)
                         postLen = len(pos_df)
                         
                         if postLen > crntLen:
