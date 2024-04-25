@@ -440,15 +440,23 @@ def main():
                         crntLen = len(pos_df)
                         
                         x22 = crntmsg.split("@")
-                        lmt_price = round_nearest_qtr(float(x22[1]))
+                        lmt_price = round_nearest_qtr(float(x22[1].split(' ')[0]))
+                        stp_price = round_nearest_qtr(float(x22[-1]))
                         app.reqIds(-1)
                         time.sleep(1.5)
                         order_id = app.nextValidOrderId
                         print('in enter short')
                         
                         # enter short order
-                        app.placeOrder(order_id,contract,marketOrder("SELL",qty))
-                        
+                        # app.placeOrder(order_id,contract,marketOrder("SELL",qty))
+                        bracket = bktOrder(order_id,"BUY",1,lmt_price,stp_price,lmt_price-100)
+                        try:
+                            for ordr in bracket:
+                                app.placeOrder(ordr.orderId, contract, ordr)
+                        except:
+                            print('error found')
+                            
+                     
                         time.sleep(2)
                         
                         app.reqPositions()
