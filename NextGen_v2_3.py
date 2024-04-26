@@ -421,9 +421,8 @@ def main():
                         app.reqIds(-1)
                         time.sleep(1)
                         order_id = app.nextValidOrderId 
-                        time.sleep(2)  # Added a 2-second delay before requesting positions
                         app.reqPositions() 
-                        time.sleep(2) 
+                        time.sleep(1.8) 
                         pos_df = app.pos_df 
                         time.sleep(1.5)
                         if pos_df[pos_df['Symbol'] == contractName].iloc[0]['Position']>0:
