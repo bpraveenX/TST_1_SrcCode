@@ -414,23 +414,28 @@ def main():
                         else:
                             send_discord_message('Order didnt go through!')
                         
-                    elif 'Exit Long' in crntmsg:
-                        # exit : in bracket order have to cancel open limit orders
-                        # order_id = ordernum - 3
-                        # app.cancelOrder(order_id)
-                        app.reqIds(-1)
-                        time.sleep(1)
-                        order_id = app.nextValidOrderId 
-                        app.reqPositions() 
-                        time.sleep(1.8) 
-                        pos_df = app.pos_df 
-                        time.sleep(1.5)
-                        if pos_df[pos_df['Symbol'] == contractName].iloc[0]['Position']>0:
-                           app.placeOrder(order_id,contract,marketOrder("SELL",qty))
-                        time.sleep(1.9) 
-                        # app.reqGlobalCancel() 
-                        time.sleep(2) 
-                        send_discord_message('Exited Long..')
+                    elif 'Exit Short SL' in crntmsg or 'Exit Long SL' in crntmsg or 'Exit Short TP' in crntmsg or 'Exit Long TP' in crntmsg:
+                       # Cancel any open bracket orders
+                       app.reqGlobalCancel()
+                       time.sleep(1)
+
+                       # Close the open position at market price
+                       app.reqIds(-1)
+                       time.sleep(1)
+                       order_id = app.nextValidOrderId
+
+                       time.sleep(2)  # Added a 2-second delay before requesting positions
+                       app.reqPositions()
+                       time.sleep(2)  # Added a 2-second delay after requesting positions
+                       pos_df = app.pos_df
+
+                       if pos_df[pos_df['Symbol'] == contractName].iloc[0]['Position'] > 0:
+                       app.placeOrder(order_id, contract, marketOrder("SELL", int(qty)))
+                       elif pos_df[pos_df['Symbol'] == contractName].iloc[0]['Position'] < 0:
+                       app.placeOrder(order_id, contract, marketOrder("BUY", int(qty)))
+
+                       time.sleep(1)
+                       send_discord_message('Closed position at market.')
                         
                     elif 'Enter Short' in crntmsg or 'Close entry(s) order Long' in crntmsg or 'vi enter short' in crntmsg:
                         # enter short trade - bracket order
