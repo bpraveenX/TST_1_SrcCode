@@ -428,7 +428,7 @@ def main():
                         if pos_df[pos_df['Symbol'] == contractName].iloc[0]['Position']>0:
                            app.placeOrder(order_id,contract,marketOrder("SELL",qty))
                         time.sleep(1.9) 
-                        app.reqGlobalCancel() 
+                        #app.reqGlobalCancel() 
                         time.sleep(2) 
                         send_discord_message('Exited Long..')
                         
@@ -484,7 +484,7 @@ def main():
                         if pos_df[pos_df['Symbol'] == contractName].iloc[0]['Position']<0:
                            app.placeOrder(order_id,contract,marketOrder("BUY",qty))
                         time.sleep(1.9) 
-                        app.reqGlobalCancel() 
+                        #app.reqGlobalCancel() 
                         time.sleep(2) 
                         send_discord_message('Exited Short..')
                         
