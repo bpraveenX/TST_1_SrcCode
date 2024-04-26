@@ -421,8 +421,9 @@ def main():
                         app.reqIds(-1)
                         time.sleep(1)
                         order_id = app.nextValidOrderId 
+                        time.sleep(2)  # Added a 2-second delay before requesting positions
                         app.reqPositions() 
-                        time.sleep(1.8) 
+                        time.sleep(2) 
                         pos_df = app.pos_df 
                         time.sleep(1.5)
                         if pos_df[pos_df['Symbol'] == contractName].iloc[0]['Position']>0:
@@ -663,3 +664,42 @@ if __name__ == '__main__':
     timeInUTC = datetime.now(UtcTz)
     currentTimeInNewYork = timeInNewYork.strftime("%H:%M:%S")
     currentTimeInUTC = timeInUTC.strftime("%H:%M:%S")
+
+
+# Function to handle entry commands for long and short positions
+def handle_entry_command(command):
+    parts = command.split()
+    action = parts[0]  # 'Enter'
+    direction = parts[1]  # 'Long' or 'Short'
+    entry_price = float(parts[2])
+    sl_label, sl_price = parts[4], float(parts[5])
+
+    contract = create_contract()
+    if direction == "Long":
+        order = create_order('BUY', entry_price, 'LMT')
+    else:
+        order = create_order('SELL', entry_price, 'LMT')
+
+    app.placeOrder(app.nextValidOrderId, contract, order)
+    print(f"Placed {direction} order at {entry_price} with SL at {sl_price}")
+
+# Function to handle exit commands to close positions at market price
+def handle_exit_command(command):
+    direction = 'BUY' if 'Short' in command else 'SELL'
+    app.reqPositions()
+    time.sleep(1)
+    positions = app.pos_df
+
+    # Cancel all open orders first
+    app.reqOpenOrders()
+    for order in app.open_orders:
+        app.cancelOrder(order.orderId)
+    
+    # Place market order to close position
+    for index, position in positions.iterrows():
+        if (direction == 'BUY' and position['Position'] < 0) or (direction == 'SELL' and position['Position'] > 0):
+            close_order = create_order(direction, position['Position'], 'MKT')
+            app.placeOrder(app.nextValidOrderId, position['Contract'], close_order)
+            print(f"Closed {direction} position at market price.")
+
+    send_discord_message(f"Executed {command}: All positions closed at market.")
