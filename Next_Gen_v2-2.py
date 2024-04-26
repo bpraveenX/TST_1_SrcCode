@@ -40,7 +40,7 @@ from discord import SyncWebhook
 def send_discord_message(message):
     webhook.send(message)
 
-cred_file = pd.read_csv('C:\\Users\\Administrator\\Downloads\\next_gen_v2_cred_text.txt', header=None)
+cred_file = pd.read_csv('C:\\Users\\Administrator\\Downloads\\next-gen-cred-text.txt', header=None)
 webhook_link = cred_file.iloc[0][0].split('=')[1].strip()
 discordChLink = cred_file.iloc[1][0].split('=')[1].strip()
 authCode = cred_file.iloc[2][0].split('=')[1].strip()
@@ -70,6 +70,35 @@ def retrieve_messages():
         df = pd.concat([df, pd.DataFrame([value['content'], value['timestamp']]).transpose()])
 
     return df
+
+def restartConnection(clientId):
+    clientId += 1
+    time.sleep(1)
+    print('restarting TWS connection')
+    app = TradeApp()
+    app.connect(host='127.0.0.1', port=int(portNum), clientId=clientId)
+    con_thread = threading.Thread(target=websocket_con, daemon=True)
+    con_thread.start()
+    time.sleep(1)
+    app.reqIds(-1)
+    try:
+        ordernum = app.nextValidOrderId
+        print(ordernum)
+        print('established connection..')
+        #msg1 = "Connection established. Exit time is " + str(exitTime)
+        #send_discord_message(msg1)
+        time.sleep(.2)
+        # break
+    except:
+        print('retrial: ', retryConnection)
+        if retryConnection > 10:
+            breakcode = 1
+            send_discord_message("Error with TWS Connection. Please check if account is logged in, or connect with our representatives.")
+            time.sleep(.5)
+            # break
+        pass
+    
+    return app,ordernum,clientId
 
 def main():
     class TradeApp(EWrapper, EClient):
@@ -319,8 +348,8 @@ def main():
     currentTimeInNewYork = timeInNewYork.strftime("%H:%M:%S")
     currentTimeInUTC = timeInUTC.strftime("%H:%M:%S")
     systemTime = datetime.now()
-    systemTime - pd.to_datetime(currentTimeInUTC)
-    pd.to_datetime(currentTimeInUTC) - systemTime
+    # systemTime - pd.to_datetime(currentTimeInUTC)
+    # pd.to_datetime(currentTimeInUTC) - systemTime
 
     deltaHours = 0
 
@@ -414,28 +443,25 @@ def main():
                         else:
                             send_discord_message('Order didnt go through!')
                         
-                    elif 'Exit Short SL' in crntmsg or 'Exit Long SL' in crntmsg or 'Exit Short TP' in crntmsg or 'Exit Long TP' in crntmsg:
-                       # Cancel any open bracket orders
-                       app.reqGlobalCancel()
-                       time.sleep(1)
-
-                       # Close the open position at market price
-                       app.reqIds(-1)
-                       time.sleep(1)
-                       order_id = app.nextValidOrderId
-
-                       time.sleep(2)  # Added a 2-second delay before requesting positions
-                       app.reqPositions()
-                       time.sleep(2)  # Added a 2-second delay after requesting positions
-                       pos_df = app.pos_df
-
-                       if pos_df[pos_df['Symbol'] == contractName].iloc[0]['Position'] > 0:
-                       app.placeOrder(order_id, contract, marketOrder("SELL", int(qty)))
-                       elif pos_df[pos_df['Symbol'] == contractName].iloc[0]['Position'] < 0:
-                       app.placeOrder(order_id, contract, marketOrder("BUY", int(qty)))
-
-                       time.sleep(1)
-                       send_discord_message('Closed position at market.')
+                    elif 'Exit Long' in crntmsg:
+                        # exit : in bracket order have to cancel open limit orders
+                        # order_id = ordernum - 3
+                        # app.cancelOrder(order_id)
+                        app.reqIds(-1)
+                        time.sleep(1)
+                        order_id = app.nextValidOrderId 
+                        app.reqPositions() 
+                        time.sleep(1.8) 
+                        pos_df = app.pos_df 
+                        time.sleep(1.5)
+                        print('checkpoint1')
+                        # posdf = pos_df[pos_df['Symbol'] == contractName].iloc[0]['Position']
+                        if pos_df[(pos_df['Symbol'] == contractName) & (pos_df['SecType'] == 'FUT')]['Position'].sum()>0:
+                           app.placeOrder(order_id,contract,marketOrder("SELL",qty))
+                        time.sleep(1.9) 
+                        app.reqGlobalCancel() 
+                        time.sleep(2) 
+                        send_discord_message('Exited Long..')
                         
                     elif 'Enter Short' in crntmsg or 'Close entry(s) order Long' in crntmsg or 'vi enter short' in crntmsg:
                         # enter short trade - bracket order
@@ -486,10 +512,10 @@ def main():
                         time.sleep(1.8) 
                         pos_df = app.pos_df 
                         time.sleep(1.5)
-                        if pos_df[pos_df['Symbol'] == contractName].iloc[0]['Position']<0:
+                        if pos_df[(pos_df['Symbol'] == contractName) & (pos_df['SecType'] == 'FUT')]['Position'].sum()<0:
                            app.placeOrder(order_id,contract,marketOrder("BUY",qty))
                         time.sleep(1.9) 
-                        # app.reqGlobalCancel() 
+                        app.reqGlobalCancel() 
                         time.sleep(2) 
                         send_discord_message('Exited Short..')
                         
