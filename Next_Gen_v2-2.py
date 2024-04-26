@@ -40,7 +40,7 @@ from discord import SyncWebhook
 def send_discord_message(message):
     webhook.send(message)
 
-cred_file = pd.read_csv('C:\\Users\\Administrator\\Downloads\\next-gen-cred-text.txt', header=None)
+cred_file = pd.read_csv('C:\\Users\\Administrator\\Downloads\\next_gen_v2_cred_text.txt', header=None)
 webhook_link = cred_file.iloc[0][0].split('=')[1].strip()
 discordChLink = cred_file.iloc[1][0].split('=')[1].strip()
 authCode = cred_file.iloc[2][0].split('=')[1].strip()
