@@ -451,7 +451,7 @@ def main():
                         
                         # enter short order
                         # app.placeOrder(order_id,contract,marketOrder("SELL",qty))
-                        bracket = bktOrder(order_id,"BUY",1,lmt_price,stp_price,lmt_price-100)
+                        bracket = bktOrder(order_id,"SELL",1,lmt_price,stp_price,lmt_price-100)
                         try:
                             for ordr in bracket:
                                 app.placeOrder(ordr.orderId, contract, ordr)
