@@ -45,7 +45,7 @@ webhook_link = cred_file.iloc[0][0].split('=')[1].strip()
 discordChLink = cred_file.iloc[1][0].split('=')[1].strip()
 authCode = cred_file.iloc[2][0].split('=')[1].strip()
 portNum = cred_file.iloc[3][0].split('=')[1].strip()
-qty = cred_file.iloc[4][0].split('=')[1].strip()
+# qty = cred_file.iloc[4][0].split('=')[1].strip()
 contractName = cred_file.iloc[5][0].split('=')[1].strip()
 
 # TTB channel
@@ -301,13 +301,7 @@ def main():
     contract.currency = "USD"
     contract.lastTradeDateOrContractMonth = expiryValue
 
-    app.get_account_summary() 
-    time.sleep(1)
     
-    if contractName == 'ES':
-       qty = self.available_funds / 15000 
-    elif contractName == 'ES:
-       qty = self.available_funds / 1500
 
     retryConnection = 0
     breakcode = 0
@@ -386,6 +380,16 @@ def main():
     prevmsg = '2'
     exitTime = datetime.now() + timedelta(minutes=29, seconds=50)
     print('exitTime is ', exitTime)
+
+    app.get_account_summary() 
+    time.sleep(1)
+    
+    if contractName == 'ES':
+       qty = self.available_funds / 15000 
+    elif contractName == 'ES:
+       qty = self.available_funds / 1500
+
+ 
     while crntmsg != prevmsg:
         try:
             msg = retrieve_messages()
