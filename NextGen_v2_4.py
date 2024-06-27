@@ -122,6 +122,13 @@ def main():
             d2 = pd.concat([self.acc_summary, d1])
             self.acc_summary = d2
 
+            if tag == "AvailableFunds":
+                print(f"Account: {account}, Available Funds: {value} {currency}")
+                self.available_funds = float(value)
+            if tag == "NetLiquidation":
+                print(f"Account: {account}, Net Liquidation: {value} {currency}")
+                self.net_liquidation = float(value)
+
         def pnl(self, reqId, dailyPnL, unrealizedPnL, realizedPnL):
             super().pnl(reqId, dailyPnL, unrealizedPnL, realizedPnL)
             dictionary = {"ReqId": reqId, "DailyPnL": dailyPnL, "UnrealizedPnL": unrealizedPnL, "RealizedPnL": realizedPnL}
@@ -133,6 +140,9 @@ def main():
             super().nextValidId(orderId)
             self.nextValidOrderId = orderId
             print("NextValidId:", orderId)
+
+        def get_account_summary(self):
+            self.reqAccountSummary(9001, "All", AccountSummaryTags.AllTags)
 
         def openOrder(self, orderId, contract, order, orderState):
             super().openOrder(orderId, contract, order, orderState)
@@ -290,6 +300,14 @@ def main():
     contract.exchange = "CME"
     contract.currency = "USD"
     contract.lastTradeDateOrContractMonth = expiryValue
+
+    app.get_account_summary() 
+    time.sleep(1)
+    
+    if contractName == 'ES':
+       qty = self.available_funds / 15000 
+    elif contractName == 'ES:
+       qty = self.available_funds / 1500
 
     retryConnection = 0
     breakcode = 0
