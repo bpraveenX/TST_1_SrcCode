@@ -23,6 +23,8 @@ import pandas as pd
 import threading
 import time
 
+from ibapi.account_summary_tags import AccountSummaryTags
+
 import requests
 import json
 
@@ -114,6 +116,8 @@ def main():
                                                   'AuxPrice', 'Status'])
             self.pos_df = pd.DataFrame(columns=['Account', 'Symbol', 'SecType',
                                                 'Currency', 'Position', 'Avg cost'])
+            self.available_funds = 0
+            self.expiry_date = None
 
         def accountSummary(self, reqId, account, tag, value, currency):
             super().accountSummary(reqId, account, tag, value, currency)
@@ -141,8 +145,35 @@ def main():
             self.nextValidOrderId = orderId
             print("NextValidId:", orderId)
 
+        def accountSummaryEnd(self, reqId: int):
+            self.account_summary_received = True
+
+        def stop(self):
+            self.done = True
+            self.disconnect()
+
         def get_account_summary(self):
             self.reqAccountSummary(9001, "All", AccountSummaryTags.AllTags)
+
+        def contractDetails(self, reqId: int, contractDetails):
+            print("Contract Details received:")
+            print("Contract Details Attributes and Methods:")
+            for attribute in dir(contractDetails):
+                if not attribute.startswith('__'):
+                    print(f"{attribute}: {getattr(contractDetails, attribute)}")
+            # if contractDetails.contract.symbol == "ES":
+            self.expiry_date = contractDetails.contract.lastTradeDateOrContractMonth
+            print(f"Next Expiry Date for ES Contract: {self.expiry_date}")
+            
+            self.contract_details_received = True
+            self.contract_details_received = True
+    
+        
+        def contractDetailsEnd(self, reqId: int):
+            self.contract_details_received = True
+    
+        def get_contract_details(self, contract):
+            self.reqContractDetails(1001, contract)
 
         def openOrder(self, orderId, contract, order, orderState):
             super().openOrder(orderId, contract, order, orderState)
@@ -299,6 +330,11 @@ def main():
     contract.secType = "FUT"
     contract.exchange = "CME"
     contract.currency = "USD"
+
+    app.get_contract_details(contract)
+    time.sleep(1.2)
+    expiryValue = app.expiry_date[:-2]
+ 
     contract.lastTradeDateOrContractMonth = expiryValue
 
     
