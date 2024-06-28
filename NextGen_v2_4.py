@@ -432,7 +432,7 @@ def main():
     
     if contractName == 'ES':
        qty = self.available_funds / 15000 
-    elif contractName == 'ES:
+    elif contractName == 'MES':
        qty = self.available_funds / 1500
 
  
