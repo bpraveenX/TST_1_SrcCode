@@ -429,11 +429,11 @@ def main():
 
     app.get_account_summary() 
     time.sleep(1)
-    
+    import math
     if contractName == 'ES':
-       qty = app.available_funds / 15000 
+       qty = math.floor(app.available_funds / 15000 )
     elif contractName == 'MES':
-       qty = app.available_funds / 1500
+       qty = math.floor(app.available_funds / 1500)
 
  
     while crntmsg != prevmsg:
