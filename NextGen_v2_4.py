@@ -118,6 +118,7 @@ def main():
                                                 'Currency', 'Position', 'Avg cost'])
             self.available_funds = 0
             self.expiry_date = None
+            self.df_exp = pd.DataFrame(columns = ['name','expiry'])
 
         def accountSummary(self, reqId, account, tag, value, currency):
             super().accountSummary(reqId, account, tag, value, currency)
@@ -158,8 +159,15 @@ def main():
         def contractDetails(self, reqId: int, contractDetails):
             print("Contract Details received:")
             print("Contract Details Attributes and Methods:")
+            i = 0 
             for attribute in dir(contractDetails):
                 if not attribute.startswith('__'):
+                    i += 1 
+                    print(i)
+                    if attribute == 'realExpirationDate':
+                        df1 = pd.DataFrame(['realExpirationDate',getattr(contractDetails, attribute)]).transpose() 
+                        df1.columns = ['name','expiry']
+                        self.df_exp = pd.concat([self.df_exp,df1])
                     print(f"{attribute}: {getattr(contractDetails, attribute)}")
             # if contractDetails.contract.symbol == "ES":
             self.expiry_date = contractDetails.contract.lastTradeDateOrContractMonth
@@ -167,6 +175,7 @@ def main():
             
             self.contract_details_received = True
             self.contract_details_received = True
+    
     
         
         def contractDetailsEnd(self, reqId: int):
@@ -333,7 +342,8 @@ def main():
 
     app.get_contract_details(contract)
     time.sleep(1.2)
-    expiryValue = app.expiry_date[:-2]
+    expiryValue = app.df_exp.sort_values(by = 'expiry')['expiry'].iloc[0][:-2]
+    # expiryValue = app.expiry_date[:-2]
  
     contract.lastTradeDateOrContractMonth = expiryValue
 
