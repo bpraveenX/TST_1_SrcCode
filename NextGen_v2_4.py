@@ -329,24 +329,6 @@ def main():
     con_thread.start()
     time.sleep(1)
 
-    def round_nearest_qtr(number):
-        base = 0.25
-        return round(base * round(number / base), 2)
-
-    tickers = ["ES"]
-    contract = Contract()
-    contract.symbol = contractName
-    contract.secType = "FUT"
-    contract.exchange = "CME"
-    contract.currency = "USD"
-
-    app.get_contract_details(contract)
-    time.sleep(1.2)
-    expiryValue = app.df_exp.sort_values(by = 'expiry')['expiry'].iloc[0][:-2]
-    # expiryValue = app.expiry_date[:-2]
- 
-    contract.lastTradeDateOrContractMonth = expiryValue
-
     
 
     retryConnection = 0
@@ -395,7 +377,25 @@ def main():
                     time.sleep(.5)
                     break
                 pass
+    def round_nearest_qtr(number):
+        base = 0.25
+        return round(base * round(number / base), 2)
 
+    tickers = ["ES"]
+    contract = Contract()
+    contract.symbol = contractName
+    contract.secType = "FUT"
+    contract.exchange = "CME"
+    contract.currency = "USD"
+
+    app.get_contract_details(contract)
+    time.sleep(1.2)
+    expiryValue = app.df_exp.sort_values(by = 'expiry')['expiry'].iloc[0][:-2]
+    # expiryValue = app.expiry_date[:-2]
+ 
+    contract.lastTradeDateOrContractMonth = expiryValue
+
+    
     prevmsg = ''
     error_inc = 0
     folder_time = datetime.now().strftime("%Y-%m-%d")
