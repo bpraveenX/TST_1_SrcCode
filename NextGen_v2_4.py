@@ -431,9 +431,9 @@ def main():
     time.sleep(1)
     
     if contractName == 'ES':
-       qty = self.available_funds / 15000 
+       qty = app.available_funds / 15000 
     elif contractName == 'MES':
-       qty = self.available_funds / 1500
+       qty = app.available_funds / 1500
 
  
     while crntmsg != prevmsg:
