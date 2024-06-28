@@ -359,6 +359,8 @@ def main():
             break
         try:
             ordernum = app.nextValidOrderId
+            if type(ordernum) != int:
+               print(1/0)
             print('established connection..')
             #msg1 = "Connection established. Exit time is " + str(exitTime)
             #send_discord_message(msg1)
