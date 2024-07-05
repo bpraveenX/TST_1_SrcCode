@@ -210,7 +210,6 @@ UtcTz = pytz.timezone("UTC")
 timeInNewYork = datetime.datetime.now(newYorkTz)
 #### core logic below 
 # initialize discord messages
-qty = 2
 
 crntmsg = '1'
 prevmsg = '2'
