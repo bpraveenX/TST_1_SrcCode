@@ -251,9 +251,9 @@ while datetime.datetime.now() < exitTime:
         crntmtime = msg.iloc[0][1]
         
         # trying the print of all open positions 
-        positions = ib.positions()
-        for position in positions:
-            print(position)
+        # positions = ib.positions()
+        # for position in positions:
+        #     print(position)
         if crntmsg!=prevmsg: 
             print(crntmsg)
             if 'Enter Long' in crntmsg or 'Close entry(s) order Short' in crntmsg:
