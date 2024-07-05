@@ -82,6 +82,8 @@ def connect_with_retry(host, port, max_retries, clientId):
 
 ib, clientId = connect_with_retry('127.0.0.1', portNum, 100, clientId)
 
+textdiscord = "Connected established with ClientID"+clientId
+send_discord_message(textdiscord)
 
 ## getting account balance 
 account_summary = ib.accountSummary()
