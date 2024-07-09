@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 Created on Thu Jul  7 12:18:30 2024
-adding text at 1:09 EST
+adding text at 12:43 EST
 @author: prave
 """
 
@@ -70,7 +70,12 @@ def connect_with_retry(host, port, max_retries, clientId):
             connected = True
             print(f'Successfully connected with clientId = {clientId}')
         except Exception as e:
+            print(type(e))
+            e1 = e
             print(f'Connection failed with clientId = {clientId}. Retrying...')
+            if "name 'host' is not defined" in str(e1):
+                send_discord_message('Login to the IB Account.')
+                break
             clientId += 1
             time.sleep(1)  # Sleep for a short while before retrying
 
@@ -80,7 +85,7 @@ def connect_with_retry(host, port, max_retries, clientId):
     return ib, clientId
 
 
-ib, clientId = connect_with_retry('127.0.0.1', portNum, 100, clientId)
+ib, clientId = connect_with_retry('127.0.0.1', portNum, 10, clientId)
 
 textdiscord = "Connection established with ClientID"+str(clientId)
 send_discord_message(textdiscord)
@@ -265,6 +270,9 @@ while datetime.datetime.now() < exitTime:
                 limit_price = round_nearest_qtr(float(x22[1].split(' ')[0]))
                 stop_loss_price = round_nearest_qtr(float(x22[-1]))
                 side = "BUY"
+                if stop_loss_price > limit_price:
+                    send_discord_message("Stop loss price is adjusted")
+                    stop_loss_price = limit_price - 5 
                 take_profit_price = limit_price + 100
                 bktOrderFunc(side,qty,limit_price,take_profit_price,stop_loss_price)
                 time.sleep(20)
@@ -282,6 +290,9 @@ while datetime.datetime.now() < exitTime:
                 x22 = crntmsg.split("@")
                 limit_price = round_nearest_qtr(float(x22[1].split(' ')[0]))
                 stop_loss_price = round_nearest_qtr(float(x22[-1]))
+                if stop_loss_price < limit_price:
+                    send_discord_message("SL adjusted")
+                    stop_loss_price = limit_price + 5
                 side = "SELL"
                 take_profit_price = limit_price - 100
                 bktOrderFunc(side,qty,limit_price,take_profit_price,stop_loss_price)
