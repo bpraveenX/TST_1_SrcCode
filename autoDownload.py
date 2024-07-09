@@ -1,0 +1,68 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Mon Jul  8 10:58:36 2024
+
+@author: prave
+"""
+
+import os
+import requests
+import subprocess
+import tkinter as tk
+from tkinter import messagebox
+
+
+
+# GITHUB_REPO_URL = "https://raw.githubusercontent.com/bpraveenX/TST_1_SrcCode/main/tst_v6_local.py"
+# LOCAL_SCRIPT_PATH = "tst_v_n2.py"
+
+# Function to download the latest script
+def download_latest_script():
+    try:
+        print('trying loop1')
+        response = requests.get(GITHUB_REPO_URL)
+        response.raise_for_status()
+        # print(response.text)
+        with open(LOCAL_SCRIPT_PATH, 'w') as file:
+            file.write(response.text)
+        # messagebox.showinfo("Success", "Script updated successfully!")
+    except Exception as e:
+        print(e)
+        # messagebox.showerror("Error", f"Failed to download the script: {e}")
+
+# Function to run the script
+def run_script():
+    try:
+        subprocess.run(["python", LOCAL_SCRIPT_PATH])
+    except Exception as e:
+        print(e)
+        # messagebox.showerror("Error", f"Failed to run the script: {e}")
+
+# Create the main application window
+# download_latest_script()
+
+
+for i in range(0,10):
+    GITHUB_REPO_URL = "https://raw.githubusercontent.com/bpraveenX/TST_1_SrcCode/main/tst_v9_insync.py"
+    LOCAL_SCRIPT_PATH = "tst_v_n2.py"
+    download_latest_script()
+    
+    
+    url = GITHUB_REPO_URL
+    import time
+    
+    # Append a cache-busting query parameter
+    cache_buster = str(int(time.time()))
+    url_with_cache_buster = f"{url}?cache_buster={cache_buster}"
+    
+    # Fetch the file content
+    response = requests.get(url_with_cache_buster)
+    
+    if response.status_code == 200:
+        content = response.text
+        print("File content fetched successfully:")
+        print(content[:100])
+    else:
+        print(f"Failed to fetch the file. Status code: {response.status_code}")
+        
+    time.sleep(120)
