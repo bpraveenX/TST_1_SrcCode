@@ -8,9 +8,6 @@ Created on Mon Jul  8 10:58:36 2024
 import os
 import requests
 import subprocess
-import tkinter as tk
-from tkinter import messagebox
-
 
 
 # GITHUB_REPO_URL = "https://raw.githubusercontent.com/bpraveenX/TST_1_SrcCode/main/tst_v6_local.py"
@@ -41,28 +38,7 @@ def run_script():
 # Create the main application window
 # download_latest_script()
 
+GITHUB_REPO_URL = "https://raw.githubusercontent.com/bpraveenX/TST_1_SrcCode/main/tst_v9_insync.py"
+LOCAL_SCRIPT_PATH = "NextGen_v2_4.py"
+download_latest_script()
 
-for i in range(0,10):
-    GITHUB_REPO_URL = "https://raw.githubusercontent.com/bpraveenX/TST_1_SrcCode/main/tst_v9_insync.py"
-    LOCAL_SCRIPT_PATH = "tst_v_n2.py"
-    download_latest_script()
-    
-    
-    url = GITHUB_REPO_URL
-    import time
-    
-    # Append a cache-busting query parameter
-    cache_buster = str(int(time.time()))
-    url_with_cache_buster = f"{url}?cache_buster={cache_buster}"
-    
-    # Fetch the file content
-    response = requests.get(url_with_cache_buster)
-    
-    if response.status_code == 200:
-        content = response.text
-        print("File content fetched successfully:")
-        print(content[:100])
-    else:
-        print(f"Failed to fetch the file. Status code: {response.status_code}")
-        
-    time.sleep(120)
