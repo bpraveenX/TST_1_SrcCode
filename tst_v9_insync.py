@@ -87,8 +87,8 @@ def connect_with_retry(host, port, max_retries, clientId):
 
 ib, clientId = connect_with_retry('127.0.0.1', portNum, 10, clientId)
 
-textdiscord = "Connection established with ClientID"+str(clientId)
-send_discord_message(textdiscord)
+
+
 
 ## getting account balance 
 account_summary = ib.accountSummary()
@@ -99,7 +99,8 @@ for item in account_summary:
         break
     
 available_funds = float(available_funds)
-
+textdiscord = "Connection established with ClientID"+str(clientId)+" with $" + str(available_funds)
+send_discord_message(textdiscord)
 # estimate position size for this account 
 
 
@@ -281,11 +282,13 @@ while datetime.datetime.now() < exitTime:
                 ib.disconnect()
                 time.sleep(1)
                 ib, clientId = connect_with_retry('127.0.0.1', portNum, 100, clientId)
+                send_discord_message('Long order placed')
             elif 'Exit Long' in crntmsg:
                 cancel_bracket_orders_and_close_position()
                 ib.disconnect()
                 time.sleep(1)
                 ib, clientId = connect_with_retry('127.0.0.1', portNum, 100, clientId)
+                send_discord_message('Long Exit')
             elif 'Enter Short' in crntmsg or 'Close entry(s) order Long' in crntmsg:
                 cancel_bracket_orders_and_close_position()
                 time.sleep(.5)
@@ -302,11 +305,13 @@ while datetime.datetime.now() < exitTime:
                 ib.disconnect()
                 time.sleep(1)
                 ib, clientId = connect_with_retry('127.0.0.1', portNum, 100, clientId)
+                send_discord_message('Short order placed')
             elif 'Exit Short' in crntmsg:
                 cancel_bracket_orders_and_close_position()
                 ib.disconnect()
                 time.sleep(1)
                 ib, clientId = connect_with_retry('127.0.0.1', portNum, 100, clientId)
+                send_discord_message('Short order exit')
                 
             elif 'time left' in crntmsg:
                 timeleft = exitTime - datetime.datetime.now()
