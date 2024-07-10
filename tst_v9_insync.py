@@ -94,7 +94,7 @@ send_discord_message(textdiscord)
 account_summary = ib.accountSummary()
 available_funds = None
 for item in account_summary:
-    if item.tag == 'AvailableFunds':
+    if item.tag == 'ExcessLiquidity':
         available_funds = item.value
         break
     
