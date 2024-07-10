@@ -139,7 +139,9 @@ if contractName == "MES":
     qty = math.floor(available_funds/1500)
 elif contractName == "ES":
     qty = math.floor(available_funds/15000)
-    
+
+if qty == 0:
+    send_discord_message('0 QTY, fix the issue!')
     
 def bktOrderFunc(side,qty,limit_price,take_profit_price,stop_loss_price):
     
