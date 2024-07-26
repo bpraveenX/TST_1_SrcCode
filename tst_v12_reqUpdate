@@ -102,7 +102,6 @@ ib, clientId = connect_with_retry('127.0.0.1', portNum, 10, clientId)
 
 
 
-
 ## getting account balance 
 account_summary = ib.accountSummary()
 available_funds = None
@@ -183,6 +182,7 @@ def bktOrderFunc(side,qty,limit_price,take_profit_price,stop_loss_price):
     for o in bracket_order:
         o.outsideRth = True
         o.tif = "GTC"
+        # o.transmit = True
         
     # Iterate over each order in the bracket and place it
     for o in bracket_order:
@@ -195,12 +195,13 @@ def bktOrderFunc(side,qty,limit_price,take_profit_price,stop_loss_price):
 # Function to cancel all bracket orders and close position
 def cancel_bracket_orders_and_close_position():
     # Iterate over open orders
-    for ord1 in ib.reqAllOpenOrders():
-        order = ord1.order
-            # Cancel the order
-        ib.cancelOrder(order)
-        print('cancel order')
+    # for ord1 in ib.reqAllOpenOrders():
+    #     order = ord1.order
+    #         # Cancel the order
+    #     ib.cancelOrder(order)
+    #     print('cancel order')
     
+    ib.reqGlobalCancel()
     
     # Check open positions
     pos_df = pd.DataFrame(ib.reqPositions())
@@ -295,7 +296,6 @@ while datetime.datetime.now() < exitTime:
         positions = pos_df[pos_df['position'] != 0]
         posdf = positions
         
-        ib.positions()
         
         time.sleep(1.2)
         print('check position logic.')
@@ -313,14 +313,14 @@ while datetime.datetime.now() < exitTime:
                     else:
                         send_discord_message("NAKED LONG POSITION!!! PLEASE CHECK and RESOLVE NOW!!!!")
                         cancel_bracket_orders_and_close_position()
-                elif pos[2] < 0: # in short position
+                elif posdf['position'].iloc[pos] < 0: # in short position
                     openorderdf = ib.reqAllOpenOrders()
                     
                     time.sleep(1)
                     print('in short')
                     print(openorderdf)
                     
-                    if len(openorderdf) > 0:
+                    if len(openorderdf) == 2:
                         a = 1
                     else:
                         send_discord_message("NAKED SHORT POSITION!!! PLEASE CHECK and RESOLVE NOW!!!!")
@@ -329,7 +329,7 @@ while datetime.datetime.now() < exitTime:
         elif len(posdf) == 0:
             orders = ib.reqAllOpenOrders() 
             ib.sleep(.5)
-            if len(orders) == 2: ## code found position is 0 but open orders
+            if len(orders) >= 2: ## code found position is 0 but open orders
                 cancel_bracket_orders_and_close_position()
                 send_discord_message("Close Bracket Orders since no open position found!")
             
@@ -362,14 +362,15 @@ while datetime.datetime.now() < exitTime:
                     stop_loss_price = limit_price - 5 
                 take_profit_price = limit_price + 100
                 bktOrderFunc(side,qty,limit_price,take_profit_price,stop_loss_price)
-                send_discord_message('Code going to sleep for 20 seconds')
-                time.sleep(20)
+                
+                time.sleep(1)
                 ib.disconnect()
                 time.sleep(1)
                 send_discord_message('code alive again, running sanity checks.')
                 ib, clientId = connect_with_retry('127.0.0.1', portNum, 100, clientId)
                 send_discord_message('Long order placed')
-                posdf = ib.positions() 
+                posdf = pd.DataFrame(ib.reqPositions())
+                posdf = posdf[posdf['position'] != 0]
                 print(len(posdf))
                 print(posdf)
                 time.sleep(2)
@@ -377,13 +378,14 @@ while datetime.datetime.now() < exitTime:
                     
                     txt = 'Current position summary:\n' 
                     txt = txt + "Number of Positions: " + str(len(posdf)) + "\n"
-                    for pos in posdf:
-                        txt = txt + str(int(pos[2])) + " of " + pos[1].symbol 
+                    for p in range(0,len(posdf)):
+                        pos = posdf.iloc[p]
+                        txt = txt + str(int(pos.position)) + " of " + pos.contract.symbol 
                     
                     lenoo = len(ib.reqAllOpenOrders()) # open orders
                     txt = txt+ " \n" + "Open Order Summary:\nNumber of Open Orders: "+str(lenoo)+"\n"
                     for oo in ib.reqAllOpenOrders():
-                        oTxt = oo.action +" - " + oo.orderType + " - lmt/stp:"+str(oo.lmtPrice)+"/"+str(oo.auxPrice) + ", orderType:"+oo.tif  + "\n"
+                        oTxt = oo.order.action +" - " + oo.order.orderType + " - lmt/stp:"+str(oo.order.lmtPrice)+"/"+str(oo.order.auxPrice) + ", orderType:"+oo.order.tif  + "\n"
                         txt = txt + oTxt
                     
                     
@@ -393,19 +395,20 @@ while datetime.datetime.now() < exitTime:
             elif 'Exit Long' in crntmsg:
                 cancel_bracket_orders_and_close_position()
                 
-                send_discord_message('Long Exit, Code going to sleep for 10 seconds')
+                send_discord_message('Long Exit')
                 ib.disconnect()
-                time.sleep(10)
+                time.sleep(1)
                 send_discord_message('code alive again, running sanity checks.')
                 ib, clientId = connect_with_retry('127.0.0.1', portNum, 100, clientId)
                 
                 
-                posdf = ib.positions() 
+                posdf = pd.DataFrame(ib.reqPositions())
+                posdf = posdf[posdf['position'] != 0]
                 time.sleep(2)
                 if len(posdf)>0:
-                    send_discord_message('Current position summary is :'+str(ib.positions()[2]))
+                    send_discord_message('Current position summary is :'+str(posdf))
                 else:
-                    send_discord_message('Current position summary is :'+str(ib.positions()))
+                    send_discord_message('Current position summary is :'+str(posdf))
             elif 'Enter Short' in crntmsg or 'Close entry(s) order Long' in crntmsg:
                 cancel_bracket_orders_and_close_position()
                 time.sleep(.5)
@@ -418,13 +421,14 @@ while datetime.datetime.now() < exitTime:
                 side = "SELL"
                 take_profit_price = limit_price - 100
                 bktOrderFunc(side,qty,limit_price,take_profit_price,stop_loss_price)
-                send_discord_message('Code going to sleep for 20 seconds')
-                time.sleep(20)
+                
+                time.sleep(1)
                 ib.disconnect()
                 time.sleep(1)
                 ib, clientId = connect_with_retry('127.0.0.1', portNum, 100, clientId)
                 send_discord_message('Short order placed')
-                posdf = ib.positions() 
+                posdf = pd.DataFrame(ib.reqPositions())
+                posdf = posdf[posdf['position'] != 0]
                 print(len(posdf))
                 print(posdf)
                 time.sleep(2)
@@ -432,34 +436,36 @@ while datetime.datetime.now() < exitTime:
                     
                     txt = 'Current position summary:\n' 
                     txt = txt + "Number of Positions: " + str(len(posdf)) + "\n"
-                    for pos in posdf:
-                        txt = txt + str(int(pos[2])) + " of " + pos[1].symbol 
+                    for p in range(0,len(posdf)):
+                        pos = posdf.iloc[p]
+                        txt = txt + str(int(pos.position)) + " of " + pos.contract.symbol 
                     
                     lenoo = len(ib.reqAllOpenOrders()) # open orders
                     txt = txt+ " \n" + "Open Order Summary:\nNumber of Open Orders: "+str(lenoo)+"\n"
                     for oo in ib.reqAllOpenOrders():
-                        oTxt = oo.action +" - " + oo.orderType + " - lmt/stp:"+str(oo.lmtPrice)+"/"+str(oo.auxPrice) + ", orderType:"+oo.tif  + "\n"
+                        oTxt = oo.order.action +" - " + oo.order.orderType + " - lmt/stp:"+str(oo.order.lmtPrice)+"/"+str(oo.order.auxPrice) + ", orderType:"+oo.order.tif  + "\n"
                         txt = txt + oTxt
                     
                     
                     send_discord_message(txt)
                 else:
-                    send_discord_message('Current position summary is :'+str(ib.positions()))
+                    send_discord_message('Current position summary is :'+str(ib.reqPositions()))
             elif 'Exit Short' in crntmsg:
                 cancel_bracket_orders_and_close_position()
-                send_discord_message('Short Exit, Code going to sleep for 10 seconds')
+                send_discord_message('Short Exit')
                 ib.disconnect()
-                time.sleep(10)
+                time.sleep(1)
                 send_discord_message('code alive again, running sanity checks.')
                 ib, clientId = connect_with_retry('127.0.0.1', portNum, 100, clientId)
                 
                 
-                posdf = ib.positions() 
+                posdf = pd.DataFrame(ib.reqPositions())
+                posdf = posdf[posdf['position'] != 0]
                 time.sleep(2)
                 if len(posdf)>0:
-                    send_discord_message('Current position summary is :'+str(ib.positions()[2]))
+                    send_discord_message('Current position summary is :'+str(posdf))
                 else:
-                    send_discord_message('Current position summary is :'+str(ib.positions()))
+                    send_discord_message('Current position summary is :'+str(posdf))
                 
             elif 'time left' in crntmsg:
                 timeleft = exitTime - datetime.datetime.now()
