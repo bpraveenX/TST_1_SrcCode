@@ -1,0 +1,50 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Fri Jul 19 14:32:38 2024
+
+@author: prave
+"""
+
+import time
+import requests
+import pandas as pd
+import re
+
+API_URL = 'httumessages'
+
+token = '1002-bcdefgh'  # Replace with a valid token
+
+# Headers including the authorization token
+headers = {
+    'Authorization': token
+}
+
+def extract_datetime(text):
+    # Regular expression pattern to match ISO 8601 datetime format
+    pattern = r'\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z'
+    matches = re.findall(pattern, text)
+    return matches
+
+def poll_api():
+    while True:
+        try:
+            # headers = {"HeaderAuth1" : "headerValue1"}
+            response = requests.get(API_URL, headers = headers)
+            if response.status_code == 200:
+                # print('Data:', response.json())
+                list1 = []
+                for x in response.json():
+                    if "@time" in x['Message']:
+                        list1.append(x['Message'])
+
+                listdf = pd.DataFrame(list1)
+                print(list1)
+                print("\n\n")
+            else:
+                print('Failed to fetch data. Status code:', response.status_code)
+        except Exception as e:
+            print('Error:', str(e))
+        time.sleep(1)  # Wait for 1 second before polling again
+
+if __name__ == '__main__':
+    poll_api()
