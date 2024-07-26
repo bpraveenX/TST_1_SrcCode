@@ -1,0 +1,32 @@
+
+### code below is to post to clientsummarytable 
+import requests
+import json
+
+# Define the API endpoint
+api_url = 'https://-2.amazonaws.com/dev/client'
+
+# Define the data to be sent
+data = {
+    "clientId": "12345",       # Replace with your actual client ID
+    "TradeStatus": "FromPython",    # Replace with your actual trade status
+    "AccountSize": "100000",      # Replace with your actual account size
+    "TradeTime" : "2024-07-26T06:57:00"
+}
+
+# Convert the data to JSON format
+json_data = json.dumps(data)
+
+# Set the headers for the request
+headers = {
+    'Content-Type': 'application/json'  # Specify the content type as JSON
+}
+
+# Send the POST request to the API
+response = requests.post(api_url, data=json_data, headers=headers)
+
+# Check the response
+if response.status_code == 200:
+    print('Data inserted successfully!')
+else:
+    print(f'Failed to insert data: {response.status_code} - {response.text}')
