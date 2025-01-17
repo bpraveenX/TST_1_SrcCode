@@ -40,7 +40,7 @@ maxSLperday = st.sidebar.number_input('Max SL per day',100)
 
 submit = st.sidebar.button('Submit')
 # File path for saving the tick data
-csv_files = ['C:\\Users\\Administrator\\Downloads\\tick_data_cl.csv']#,'tick_data_bn.csv', 'tick_data_nft.csv']
+csv_files = ['tick_data_cl.csv']#,'tick_data_bn.csv', 'tick_data_nft.csv']
 
 outdf = pd.DataFrame() 
 
@@ -55,46 +55,14 @@ if submit:
 
         ## read the csv file 
         df1 = pd.read_csv(csv_file)
-        
-        df1.columns = ['instrument_token', 'last_price', 'high', 'low', 'open', 'close', 'change', 'exchange_timestamp']
+        df1 = df1.iloc[:, 1:]
+        df1.columns = ['instrument_token', 'last_price', 'high', 'low', 'open', 'close', 'change', 'exchange_timestamp','date']
         # if csv_file == csv_files[1] or csv_file == csv_files[2]:
             # df1.columns = ['instrument_token', 'last_price', 'high', 'low', 'open', 'close','change', 'exchange_timestamp']
         df1['exchange_timestamp'] = pd.to_datetime(df1['exchange_timestamp'])
         df1['date'] = df1['exchange_timestamp'].dt.date
 
-        breakEvenDone = 0 #used to check if the break even adjustment is done
-        openCalculated = 0 
-        openValue = 0 
-
-        enterLongLevel = 0 
-        enterShortLevel = 0 
-        currentTrade = '' # either Long or Short 
-        takeProfitLevel = 0 
-        stopLossLevel = 0 
-        reEnterLevel = 0 
-
-        enterLongPrice = 0 
-        enterShortPrice = 0 
-
-        dailyStopLoss = -1*maxSLperday
-
-        currentZone = 0 
-
-        codeEnded = 0 
-
         summdf = pd.DataFrame()
-
-        tick_data = {}
-        tick_df = pd.DataFrame() 
-
-        totalProfit = 0 
-
-        indiatime = 0 
-
-        qty = 0 
-        incZone = 0 
-
-
         ####### backtest engine ###################
         for dt in df1['date'].unique():
             breakEvenDone = 0 #used to check if the break even adjustment is done
@@ -117,8 +85,7 @@ if submit:
 
             codeEnded = 0 
 
-            summdf = pd.DataFrame()
-
+        
             tick_data = {}
             tick_df = pd.DataFrame() 
 
@@ -134,11 +101,16 @@ if submit:
             x = 0 
             if dt > pd.to_datetime('2024-01-01').date():
                 while x in range(-1,len(df)-1):
-                    
-                    if totalProfit < maxSLperday:
+                    x = x + 1
+                    endday = False
+
+                    if x >= len(df)-2:
+                        endday = True
+
+                    if totalProfit < dailyStopLoss:
                         break
                     
-                    x = x + 1
+                    
                     tick = df.iloc[x].to_dict()
                     tick_data = tick
                     # print(tick)
@@ -148,11 +120,11 @@ if submit:
                     high = tick['high']
                     low = tick['low']
                     open_price = tick['open']
-                    close_price = tick['close']
+                    close_price = tick['last_price']
                     change = tick.get('change', 0)  # Handle 'change' if missing
                     exchange_timestamp = tick['exchange_timestamp']
 
-                    endday = False
+                    
                     # if indiatime == 0:
                     #     endday = exchange_timestamp.hour == 5 and exchange_timestamp.minute >= 50 
                     # else:
@@ -333,6 +305,7 @@ if submit:
         # breakeven logic
         ####### backtest engine ###################
         incZone = 0 
+        summdf = pd.DataFrame()
         for dt in df1['date'].unique():
             df = df1[df1['date'] == dt]
             breakEvenDone = 0 #used to check if the break even adjustment is done
@@ -355,7 +328,7 @@ if submit:
 
             codeEnded = 0 
 
-            summdf = pd.DataFrame()
+            
 
             tick_data = {}
             tick_df = pd.DataFrame() 
@@ -370,9 +343,14 @@ if submit:
             x = 0 
             if dt > pd.to_datetime('2024-01-01').date():
                 while x in range(-1,len(df)-1):
+                    endday = False
                     x = x + 1
+                    if x >= len(df)-2:
+                        endday = True
+                        
                     if totalProfit < dailyStopLoss:
                         break
+                    
                     tick = df.iloc[x].to_dict()
                     tick_data = tick
                     # print(tick)
@@ -382,11 +360,10 @@ if submit:
                     high = tick['high']
                     low = tick['low']
                     open_price = tick['open']
-                    close_price = tick['close']
+                    close_price = tick['last_price']
                     change = tick.get('change', 0)  # Handle 'change' if missing
                     exchange_timestamp = tick['exchange_timestamp']
 
-                    endday = False
                     # if indiatime == 0:
                     #     endday = exchange_timestamp.hour == 5 and exchange_timestamp.minute >= 50 
                     # else:
@@ -569,6 +546,7 @@ if submit:
         ## STRAEGY D ###############
         ####### backtest engine ###################
         incZone = 0 
+        summdf = pd.DataFrame()
         for dt in df1['date'].unique():
             df = df1[df1['date'] == dt]
             breakEvenDone = 0 #used to check if the break even adjustment is done
@@ -591,8 +569,7 @@ if submit:
 
             codeEnded = 0 
 
-            summdf = pd.DataFrame()
-
+           
             tick_data = {}
             tick_df = pd.DataFrame() 
 
@@ -606,9 +583,14 @@ if submit:
             x = 0 
             if dt > pd.to_datetime('2024-01-01').date():
                 while x in range(-1,len(df)-1):
-                    if totalProfit < dailyStopLoss:
-                        break 
+                    endday = False
                     x = x + 1
+                    if x >= len(df)-2:
+                        endday = True
+                        
+                    if totalProfit < dailyStopLoss:
+                        break
+                    
                     tick = df.iloc[x].to_dict()
                     tick_data = tick
                     # print(tick)
@@ -618,15 +600,10 @@ if submit:
                     high = tick['high']
                     low = tick['low']
                     open_price = tick['open']
-                    close_price = tick['close']
+                    close_price = tick['last_price']
                     change = tick.get('change', 0)  # Handle 'change' if missing
                     exchange_timestamp = tick['exchange_timestamp']
 
-                    endday = False
-                    # if indiatime == 0:
-                    #     endday = exchange_timestamp.hour == 5 and exchange_timestamp.minute >= 50 
-                    # else:
-                    #     endday = exchange_timestamp.hour == 15 and exchange_timestamp.minute >= 20
                     if endday:
                         print('code ended')
                         codeEnded = 1
@@ -815,8 +792,8 @@ if submit:
             pbdf['Profit'][pbdf['currentTrade'] == 'Long'] = pbdf['exitPrice'][pbdf['currentTrade'] == 'Long'] - pbdf['enterPrice'][pbdf['currentTrade'] == 'Long']
             pbdf['Profit'][pbdf['currentTrade'] == 'Short'] = pbdf['enterPrice'][pbdf['currentTrade'] == 'Short'] - pbdf['exitPrice'][pbdf['currentTrade'] == 'Short']#100*(1-0.006/100) - 100* # 20
     
-            pbdf['Charges'] = 1.18*100*(pbdf['enterPrice']  + pbdf['exitPrice'])*0.0021/100 + 40
-            pbdf['Charges'] = pbdf['Charges'] + .01/100 * pbdf['exitPrice'] + 0.002/100 * pbdf['enterPrice']
+            pbdf['Charges'] = 1.18*(100*(pbdf['enterPrice']  + pbdf['exitPrice'])*0.0021/100 + 40)
+            pbdf['Charges'] = pbdf['Charges'] + .01/100 * pbdf['exitPrice']*100 + 0.002/100 * pbdf['enterPrice']*100
             
             pbdf['Profit'] = pbdf['Profit'] * 100 - pbdf['Charges']
             
@@ -845,7 +822,7 @@ if submit:
             pcdf['Profit'][pcdf['currentTrade'] == 'Short'] = pcdf['enterPrice'][pcdf['currentTrade'] == 'Short'] - pcdf['exitPrice'][pcdf['currentTrade'] == 'Short']#100*(1-0.006/100) - 100* # 20
     
             pcdf['Charges'] = 1.18*100*(pcdf['enterPrice']  + pcdf['exitPrice'])*0.0021/100 + 40
-            pcdf['Charges'] = pcdf['Charges'] + .01/100 * pcdf['exitPrice'] + 0.002/100 * pcdf['enterPrice']
+            pcdf['Charges'] = pcdf['Charges'] + .01/100 * pcdf['exitPrice']*100 + 0.002/100 * pcdf['enterPrice']*100
             
             pcdf['Profit'] = pcdf['Profit'] * 100 - pcdf['Charges']
         except:
@@ -872,7 +849,7 @@ if submit:
             pddf['Profit'][pddf['currentTrade'] == 'Short'] = pddf['enterPrice'][pddf['currentTrade'] == 'Short'] - pddf['exitPrice'][pddf['currentTrade'] == 'Short']#100*(1-0.006/100) - 100* # 20
     
             pddf['Charges'] = 1.18*100*(pddf['enterPrice']  + pddf['exitPrice'])*0.0021/100 + 40
-            pddf['Charges'] = pddf['Charges'] + .01/100 * pddf['exitPrice'] + 0.002/100 * pddf['enterPrice']
+            pddf['Charges'] = pddf['Charges'] + .01/100 * pddf['exitPrice']*100 + 0.002/100 * pddf['enterPrice']*100
             
             pddf['Profit'] = pddf['Profit'] * 100 - pddf['Charges']
             
@@ -928,3 +905,6 @@ if submit:
 
     st.header('Price D')
     st.dataframe(pddf)
+
+
+    st.dataframe(price_c_df)
